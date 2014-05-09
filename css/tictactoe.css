@@ -1,0 +1,23 @@
+/*BASIC TABLE*/
+
+table tr td 
+{
+    border: 2px solid black;
+    border-collapse:collapse;  
+}
+table td 
+{
+    width:100px;
+    height:100px;
+}
+
+#field1, #field2, #field3,
+#field4, #field5, #field6,
+#field7, #field8, #field9
+{
+   border-radius: 50%;
+   width: 70px;
+   height: 70px;
+   background: white;
+   padding: 15px;
+}
