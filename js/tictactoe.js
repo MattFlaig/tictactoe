@@ -49,9 +49,29 @@ function loadImage(id) {
     }
 }
 
- function computerFirstRound() {
+function computerFirstRound() {
+
     
  }
+
+function possibleChoices() {
+    var fieldsComputer = [2,7,6,9,5,1,4,3,8];
+    possibleChoicesComputer = [];
+    for (i=0; i<fieldsComputer.length;++i){
+    var firstField = parseInt(fieldsComputer[i]);
+      for (j=0; j<fieldsComputer.length;++j){
+      var secondField = parseInt(fieldsComputer[j]);
+        for (k=0; k<fieldsComputer.length;++k){
+        var thirdField = parseInt(fieldsComputer[k]);
+        }
+      }
+      var addedFields = firstField + secondField + thirdField;
+      if(addedFields == 15){
+      possibleChoicesComputer.push(firstField, secondField, thirdField);
+      }
+    }
+    return possibleChoicesComputer;
+}
 
 /*2,7,6
   9,5,1
