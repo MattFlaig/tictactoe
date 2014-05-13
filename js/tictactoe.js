@@ -1,93 +1,89 @@
-var circleColour = " ";
-var computerColour = "green";
-var fieldsComputer = [2,7,6,9,5,1,4,3,8];
-var fieldsUser = [2,7,6,9,5,1,4,3,8];
-var userChoices = [];
-var computerChoices = [];
-var playerTurn = " ";
+var fields = ["2","7","6","9","5","1","4","3","8"];
+var lastMove = " ";
 var gameRound = 0;
+var computerChoices = [];
+var userChoices = [];
+var strategicChoices = [];
+
 
 
 function AskUser() {
-    var askColour = prompt("Welcome to TicTacToe! Which colour do you like - blue or red?");
-    if (askColour == "red") {
-        circleColour = "red";
-    }
-    else if (askColour == "blue") {
-        circleColour = "blue";
-    }
-    else {
-        alert("Because you did not specify a colour you will play with black!");
-        circleColour = "black";
-    }
-
     var askTurn = confirm("If you want to begin, please press ok");
-    if (askTurn) {
-        playerTurn = "user";
-    }
-    else {
-        playerTurn = "computer";
-        computerFirstRound();
+    if (!askTurn) {
+        computerNextRound(lastMove);
     }
 }
 
-function loadImage(id) {
-
-    if (playerTurn == "user"){
-    document.getElementById(id).style.background= circleColour;
-    var firstUserChoice = id[5];
-    userChoices.push(firstUserChoice);
-    playerTurn = "computer";
-    computerFirstRound();
-    }
-    else {
-    document.getElementById(id).style.background= computerColour;
-    var firstComputerChoice = id[5];
-    computerChoices.push(firstComputerChoice);
-    playerTurn = "user";
-    userFirstRound();
+function loadImage(id, player, colour) {
+    document.getElementById(id).style.background = colour;
+    var fieldNumber = id[5];
+    pushingValues(player, fieldNumber);
+    lastMove = fieldNumber;
+    var toDelete = fields.indexOf(fieldNumber);
+    fields.splice(toDelete,1);
+    gameRound += 1;
+    //alert(fields);
+    if (player == 'user'){
+      computerNextRound();
+      
     }
 }
 
-function computerFirstRound() {
+function computerNextRound() {
+    if (gameRound >= 3){
+      //computeStrategy(computerChoices);
+      computeStrategy(userChoices);
 
-    
+    }
+    else {
+    var choiceIndex = Math.floor(Math.random() * (fields.length));
+    var computerChoice = fields[choiceIndex];
+    var choiceString = 'field' + computerChoice; 
+    loadImage(choiceString, 'computer', 'blue'); 
+    }
  }
 
-function possibleChoices() {
-    var fieldsComputer = [2,7,6,9,5,1,4,3,8];
-    possibleChoicesComputer = [];
-    for (i=0; i<fieldsComputer.length;++i){
-    var firstField = parseInt(fieldsComputer[i]);
-      for (j=0; j<fieldsComputer.length;++j){
-      var secondField = parseInt(fieldsComputer[j]);
-        for (k=0; k<fieldsComputer.length;++k){
-        var thirdField = parseInt(fieldsComputer[k]);
-        }
-      }
-      var addedFields = firstField + secondField + thirdField;
-      if(addedFields == 15){
-      possibleChoicesComputer.push(firstField, secondField, thirdField);
-      }
-    }
-    return possibleChoicesComputer;
+function pushingValues(player, fieldNumber){
+    if (player=="user"){userChoices.push(fieldNumber);}
+    else {computerChoices.push(fieldNumber);}
+    alert("Computer: " + computerChoices);
+    alert("User: " + userChoices);
 }
 
-/*2,7,6
-  9,5,1
-  4,3,8
+function computeStrategy(choices) {
+    for(i=0; i<choices.length;++i){
+        var firstAdd = choices[i];
+        for(j=i+1; j<choices.length;++j){
+        var secondAdd = choices[j];
+        var sumChoices = parseInt(firstAdd) + parseInt(secondAdd);
+        alert(sumChoices);
+        var possibleMove = 15 - sumChoices;
+        strategicChoices.push(possibleMove);
+        alert(strategicChoices); 
+        }
+    }
+}
 
-*/
 
-/*
 
-First Round: 
-first choice: 5
-second choice: 2 || 6 || 8 || 4
 
-Second Round:
-=> first aim: blocking user if he has already 2 in a row
-=> second aim: simultaneously getting two in a row
-=> third aim: trying to establish dilemma for user
+//var winningNumbers = ["1","5","9","1","6","8","2","4","9","2","5","8","2","6","7","3","4","8","3","5","7","4","5","6"];
 
-*/
+// /*2,7,6
+//   9,5,1
+//   4,3,8
+
+// */
+
+// /*
+
+// First Round: 
+// first choice: 5
+// second choice: 2 || 6 || 8 || 4
+
+// Second Round:
+// => first aim: blocking user if he has already 2 in a row
+// => second aim: simultaneously getting two in a row
+// => third aim: trying to establish dilemma for user
+
+// */

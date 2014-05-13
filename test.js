@@ -19,8 +19,8 @@ function allPossibleChoices() {
       } 
     }
     possibleChoicesComputer = makeUnique(allChoices);
-    remainingChoices(alreadyChosen);
-    document.getElementById("test").innerHTML = possibleChoicesComputer;
+    //remainingChoices(alreadyChosen);
+    document.getElementById("test").innerHTML = possibleChoicesComputer.sort();
 }
 
 function computeChoices(firstField, secondField, thirdField){
