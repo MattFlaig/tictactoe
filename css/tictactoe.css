@@ -1,4 +1,18 @@
+/*GENERAL*/
+
+body
+{
+	  text-align: center;
+}
+
+
 /*BASIC TABLE*/
+
+table 
+{
+	  border: 2px solid black;
+	  margin: auto;
+}
 
 table tr td 
 {
@@ -20,4 +34,13 @@ table td
    height: 70px;
    background: white;
    padding: 15px;
+}
+
+/*START*/
+
+.float
+{
+	
+	margin-bottom: 20px;
+	text-align: center;
 }
