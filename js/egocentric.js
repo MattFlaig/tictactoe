@@ -96,7 +96,8 @@ function egocentricStrategy(fieldNumber){
         return nextChoice;
       }
       else{withoutZero(fields);randomChoice();alert("Nix drin!");}
-      alert("Next choice:" + nextChoice);
+      return true;
+      //alert("Next choice:" + nextChoice);
     }
       
     else{
@@ -108,11 +109,13 @@ function egocentricStrategy(fieldNumber){
       withoutZero(possibleChoices);
       recursiveChoice(k=0);
       
-      if(possibleChoices.length > 0){
-        randomChoice();alert("possible choices by random");}
+      if(possibleChoices.length > 0 && possibleChoices != "0"){
+        alert("possible choices by random: " + possibleChoices);
+        randomChoice();}
       else{
         withoutZero(fields);
-        randomChoice();alert("fields by random");
+        alert("fields by random - last resort " + fields);
+        randomChoice();
       }
     }
 }
@@ -125,13 +128,17 @@ function withoutZero(array){
         choicesWithoutZero.push(nextChoice);
       }
   }
+  alert("Choices without zero: " + choicesWithoutZero);
 }
     
 function randomChoice(){  
   var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
   var nextChoice = choicesWithoutZero[possibleIndex];
+  alert("choicesWithoutZero: " + choicesWithoutZero);
+  alert("possibleIndex: " + possibleIndex);
+  alert("nextChoice: " + nextChoice);
   var choiceString = 'field' + nextChoice;
-  alert("This is random choice");
+  //alert("This is random choice");//alert(choiceString);
   setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
 }
 
