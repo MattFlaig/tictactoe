@@ -4,6 +4,10 @@ var computerChoices = [], computerResults = [];
 var userChoices = []; userResults = [];
 var possibleChoices = [];
 var playerTurn = " ";
+var endOfGame = 8;
+var winner = false;
+var choicesWithoutZero = [];
+
 
 
 
@@ -21,25 +25,49 @@ function loadImage(id, player, colour) {
     deletePushedValue(fieldNumber);
     if(gameRound>=4){computeResult(player)};
     gameRound += 1;
-    managePlayerTurn(player);
+    managePlayerTurn(player, fieldNumber);
 }
 
-function managePlayerTurn(player){
+function managePlayerTurn(player, fieldNumber){
     if (player == 'user'){
-      computerNextRound();
-      playerTurn = 'computer';
+      if(gameRound==endOfGame || winner==true){
+         playerTurn == 'user';
+      }
+      else{
+        computerNextRound(fieldNumber);
+        playerTurn = 'computer';
+      }
     }
     else {
+      deletePossibleChoices(fieldNumber);
       playerTurn = 'user';
     }
 }
 
-function computerNextRound() {
+function computerNextRound(fieldNumber) {
     //var choiceIndex = egocentricStrategy();
     //alert("Index: " + choiceIndex);
-    var computerChoice = egocentricStrategy();
-    var choiceString = 'field' + computerChoice; 
-    setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000); 
+    if(gameRound<4){
+      if(gameRound<=1){
+        var choiceIndex = Math.floor(Math.random() * (fields.length));
+        var computerChoice = fields[choiceIndex];
+        var choiceString = 'field' + computerChoice;
+        //deletePossibleChoices(fieldNumber); 
+        setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
+      }
+      else {
+        var computerChoice = egocentricStrategy(fieldNumber);
+        var choiceString = 'field' + computerChoice; 
+        setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
+      }
+         
+    }
+    else {egocentricStrategy(fieldNumber);}
+
+    //alert("Possible: " + possibleChoices);
+    //alert("Computerchoice:" + computerChoice);
+    //alert("Fields: " + fields);
+    
 }
 
 function pushValue(player, fieldNumber){
@@ -49,67 +77,146 @@ function pushValue(player, fieldNumber){
 
 function deletePushedValue(fieldNumber){
     var toDeleteField = fields.indexOf(fieldNumber);
-    fields.splice(toDeleteField,1); 
-    //var toDeletePossible = possibleChoices.indexOf(fieldNumber);
-    //alert(possibleChoices[toDeletePossible]);
-    //possibleChoices.splice(toDeletePossible, 1)
+      if(toDeleteField){
+        fields.splice(toDeleteField,1, "0"); 
+      }
+      // if(playerTurn=='computer'){
+      //   deletePossibleChoices(fieldNumber);
+      // }
 }
 
-function egocentricStrategy(){
-
-    if(gameRound<=1){
-      var choiceIndex = Math.floor(Math.random() * (fields.length));
-      var nextChoice = fields[choiceIndex];
+function deletePossibleChoices(fieldNumber){
+    //var toDeletePossible = possibleChoices.indexOf(fieldNumber);
+    //alert("Delete:" + possibleChoices[toDeletePossible]);
+    for(i=0;i<possibleChoices.length; ++i){
+    var checkDelete = possibleChoices[i];
+      //alert("Delete: " + fieldNumber);
+      //alert("Possible: " + possibleChoices);
+      if(checkDelete == fieldNumber){
+        possibleChoices.splice(i, 1,"0");
+      //alert("Possible after delete: " + possibleChoices);
+      }
     }
-    else if (gameRound == 2 || gameRound == 3){
+}
+
+
+function egocentricStrategy(fieldNumber){
+    alert("Round:" + gameRound);
+    
+    if (gameRound == 2 || gameRound == 3){
+      withoutZero();
       computeEgocentricChoices();
       possibleChoices = makeUnique(possibleChoices);
+      deletePossibleChoices(fieldNumber);
+      //deleteComputerChoices();
+
+      
+
+      //alert("User: " + userChoices);
+      //alert("Possible for PC: " + possibleChoices);
       //counter += 1;
       //alert("possible: " + possibleChoices);
-      var possibleIndex = Math.floor(Math.random() * (possibleChoices.length));
-      var nextChoice = possibleChoices[possibleIndex];
-      //var choiceIndex = fields.indexOf(nextChoice);
-    }
-    else if(gameRound == 4 || gameRound == 5){
-      for(i=0;i<possibleChoices.length;++i){
-      var possibleWin = parseInt(possibleChoices[i]);
-      var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);
-        if(possibleWin + addedChoices == 15){
-            var nextChoice = possibleWin;
-            //var choiceIndex = fields.indexOf(nextChoice);
-        }
-        else {
-            computeEgocentricChoices();
-            possibleChoices = makeUnique(possibleChoices);
-            var possibleIndex = Math.floor(Math.random() * (possibleChoices.length));
-            var nextChoice = possibleChoices[possibleIndex];
-            //var choiceIndex = fields.indexOf(nex
-        }
+      alert(possibleChoices.length);
+      if(possibleChoices.length == 0) {var nextChoice = randomChoice();}
+      else{
+        var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
+        var nextChoice = choicesWithoutZero[possibleIndex];
       }
+      //var choiceIndex = fields.indexOf(nextChoice);
+      //alert("Next choice:" + nextChoice);
+      return nextChoice;
     }
-    else{
+
+    else if(gameRound == 4 || gameRound == 5){
+      //alert("Hoho");
+      withoutZero();
       computeEgocentricChoices();
       possibleChoices = makeUnique(possibleChoices);
+      deletePossibleChoices(fieldNumber);
+      //alert("Possible: " + possibleChoices);
+      //deleteComputerChoices();
+      recursiveChoice(k=0);
       
-      for(j=0;j<computerResults.length;++j){
-        var result=parseInt(computerResults[j]);
-        //alert("result: " + result);
-        if(result+possibleWin == 15){
-          var nextChoice = possibleWin;
-          //var choiceIndex = fields.indexOf(nextChoice);
-        }
-        else{
-          var possibleIndex = Math.floor(Math.random() * (possibleChoices.length));
-          var nextChoice = possibleChoices[possibleIndex];
-          //var choiceIndex = fields.indexOf(nextChoice);
-        }
-      }
-        
+      //alert("Möööp!");
+      //computeEgocentricChoices();
+      //possibleChoices = makeUnique(possibleChoices);
+      randomChoice();
+      //alert("Next choice:" + nextChoice);
+      //return nextChoice;
+
+      //var choiceIndex = fields.indexOf(nex
       
+      
+      //
     }
-  return nextChoice;
-  alert("Next choice:" + nextChoice);
+      
+    else{
+      withoutZero();
+      computeEgocentricChoices();
+      possibleChoices = makeUnique(possibleChoices);
+      deletePossibleChoices(fieldNumber);
+      //deleteComputerChoices();
+      recursiveChoice(k=0);
+
+      randomChoice();
+      //alert("Next choice:" + nextChoice);
+      //return nextChoice;
+    }
 }
+
+
+
+
+function withoutZero(){
+
+  for(i=0;i<fields.length;++i){
+    var nextChoice = fields[i];
+      if(parseInt(nextChoice) > 0){
+        choicesWithoutZero.push(nextChoice);
+      }
+  }
+}
+    
+function randomChoice(){  
+  var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
+  var nextChoice = choicesWithoutZero[possibleIndex];
+  var choiceString = 'field' + nextChoice;
+  setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
+  alert("next: " + nextChoice);
+}
+
+function recursiveChoice(k){
+  for(i=k;i<possibleChoices.length;++i){
+    var checker = parseInt(possibleChoices[i]);
+    if(checker > 0){var possibleWin = checker;} 
+    if(gameRound>5){
+      for(j=0;j<computerResults.length;++j){
+        var addedChoices = parseInt(computerResults[j]);
+        if(determineWin(k,possibleWin,addedChoices)==true){break;}
+      }
+    }
+    else{var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);}
+    //alert("possible next:" + possibleChoices);
+        if(determineWin(k, possibleWin,addedChoices)==true){break;}
+  }
+}
+
+function determineWin(k, possibleWin, addedChoices){
+  if(possibleWin + addedChoices == 15){
+      //alert("Booom!");
+      var nextChoice = possibleWin;
+      var choiceString = 'field' + nextChoice;
+      //alert("recursiveChoice :"+  choiceString);
+      setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
+      
+      //var choiceIndex = fields.indexOf(nextChoice);
+  }
+  else {
+    if (k == (possibleChoices.length-1)){return true;}
+    else {recursiveChoice(i+1);}
+  }
+}
+
 
 function computeEgocentricChoices(){
   for(i=0;i<fields.length;++i){
@@ -117,20 +224,46 @@ function computeEgocentricChoices(){
       else {var adderIndex = Math.floor(gameRound/3);}
       //alert("adderindex: " + adderIndex);
       var firstPossible = fields[i];//alert("First: " + firstPossible);
-      var adder = 15-parseInt(computerChoices[adderIndex]);
       //alert("adder: " + adder);
         for(j=0;j<fields.length;++j){
   
           var secondPossible = fields[j];
-          //alert("Second: "+ secondPossible);
           var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-          
-          if(possibleAddedFields == adder){
-              possibleChoices.push(firstPossible, secondPossible);
+        
+          if(secondPossible>0 && firstPossible> 0){
+            if(secondPossible != firstPossible){
+              var adder = 15-parseInt(computerChoices[adderIndex]);
+              //alert("Second: "+ secondPossible);
+              
+              if(adder > 0){
+                if(possibleAddedFields == adder){
+                  possibleChoices = makeUnique(possibleChoices);
+                  //alert("Fields: "+ fields);
+                  //alert("possibleChoices: " + possibleChoices);
+                  possibleChoices.push(firstPossible, secondPossible);
+                }
+              }
+            }
           }
         } 
   }
+  
     
+}
+
+function checkIfEmpty(){
+  //if(possibleChoices.len == [ ]){
+    //var possibleIndex = Math.floor(Math.random() * (fields.length));
+    //alert("Index: " + possibleIndex);
+
+    for(i=0;i<fields.length;++i){
+    var nextChoice = fields[i];
+      if(parseInt(nextChoice) > 0){
+        
+        alert("next: " + nextChoice);return nextChoice;
+      }
+    }
+    //return nextChoice;
 }
 
 function makeUnique(possibleChoices) {
@@ -138,7 +271,9 @@ function makeUnique(possibleChoices) {
     for ( var i = 0; i < possibleChoices.length; ++i ) {
         if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
             hash[ possibleChoices[i] ] = true;
-            uniqueChoices.push(possibleChoices[i]);
+            if(parseInt(possibleChoices[i]) > 0){
+                uniqueChoices.push(possibleChoices[i]);
+            }
         }
     }
     return uniqueChoices;
@@ -188,6 +323,7 @@ function checkForTie(newResult){
 
 function won(player){
     alert("The " + player + " has won!");
+    winner = true;
     backToStart(); 
 }
 
