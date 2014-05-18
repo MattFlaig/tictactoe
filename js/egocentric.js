@@ -29,7 +29,7 @@ function loadImage(id, player, colour) {
 function managePlayerTurn(player, fieldNumber){
     if (player == 'user'){
       if(gameRound==endOfGame || winner==true){
-         playerTurn == 'user';
+         return true;
       }
       else{
         computerNextRound(fieldNumber);
@@ -43,20 +43,16 @@ function managePlayerTurn(player, fieldNumber){
 }
 
 function computerNextRound(fieldNumber) {
-    if(gameRound<4){
-      if(gameRound<=1){
-        withoutZero(fields);
-        randomChoice();//alert("fields by random");
-        alert("possible first " + choicesWithoutZero);
-      }
-      else {
-        var computerChoice = egocentricStrategy(fieldNumber);
-        var choiceString = 'field' + computerChoice; 
-        alert("possible second " + possibleChoices);
-        setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
-      }
-    }
-    else {egocentricStrategy(fieldNumber);}
+  if(gameRound<=1){
+    withoutZero(fields);
+    deletePossibleChoices(fieldNumber);
+    var computerChoice = randomChoice();
+  }
+  else {
+    var computerChoice = egocentricStrategy(fieldNumber);
+  }
+  var choiceString = 'field' + computerChoice; 
+  setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
 }
 
 function pushValue(player, fieldNumber){
@@ -66,17 +62,17 @@ function pushValue(player, fieldNumber){
 
 function deletePushedValue(fieldNumber){
     var toDeleteField = fields.indexOf(fieldNumber);
-      if(toDeleteField){
-        alert("delete field: " + fields[toDeleteField]);
+      //if(toDeleteField){
+        //alert("delete field: " + fields[toDeleteField]);
         fields.splice(toDeleteField,1, "0");
-      }
+      //}
 }
 
 function deletePossibleChoices(fieldNumber){
     for(i=0;i<possibleChoices.length; ++i){
     var checkDelete = possibleChoices[i];
       if(checkDelete == fieldNumber){
-        alert("Delete: " + fieldNumber);
+        //alert("Delete: " + fieldNumber);
         possibleChoices.splice(i, 1,"0");
       }
     }
@@ -84,37 +80,59 @@ function deletePossibleChoices(fieldNumber){
 
 function egocentricStrategy(fieldNumber){
     //alert("Round:" + gameRound);
-    
-    if (gameRound == 2 || gameRound == 3){
-      computeEgocentricChoices();
-      possibleChoices = makeUnique(possibleChoices);
-      deletePossibleChoices(fieldNumber);
-      if(possibleChoices.length > 0) {
-        withoutZero(possibleChoices);
-        var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
-        var nextChoice = choicesWithoutZero[possibleIndex];
-        return nextChoice;
+    prepareChoices(fieldNumber);
+    //if(possibleChoices.length > 0 && possibleChoices != "0"){
+      if (gameRound > 3){
+        var nextChoice = searchForWin(counter=0);
+        alert("searchForWin: " + nextChoice);
+        if (nextChoice=="noSuccess"){
+          nextChoice = findAlternativeChoices();
+          alert("First Alternative");
+        }
       }
-      else{withoutZero(fields);randomChoice();alert("Nix drin!");}
-      alert("Next choice:" + nextChoice);
-    }
-      
-    else{
-      computeEgocentricChoices();
-      possibleChoices = makeUnique(possibleChoices);
-      deletePossibleChoices(fieldNumber);
-      alert("possible higher: " + possibleChoices);
-      //deleteComputerChoices();
-      withoutZero(possibleChoices);
-      recursiveChoice(k=0);
-      
-      if(possibleChoices.length > 0){
-        randomChoice();alert("possible choices by random");}
-      else{
-        withoutZero(fields);
-        randomChoice();alert("fields by random");
+      else {
+        var nextChoice = findAlternativeChoices();
+        alert("Second Alternative");
       }
+      alert("possible: " + possibleChoices);
+      alert("possible without Zero: " + choicesWithoutZero);
+      alert("next: " + nextChoice);
+      return nextChoice;
+}
+
+function findAlternativeChoices(){
+  if(possibleChoices.length > 0 && possibleChoices != "0"){
+    var nextChoice = getNextChoice(possibleChoices);
+    alert("noSuccess - first alternative:" + nextChoice);
+  
+    if(nextChoice == "stillNoAlternative"){
+      alert("lastresort!");
+      nextChoice = getNextChoice(fields);
     }
+  }
+  else{
+    nextChoice = getNextChoice(fields);
+    alert("totallastresort!");
+  }
+  return nextChoice;
+}
+
+function getNextChoice(array){
+  withoutZero(array);
+  var nextChoice = randomChoice();
+  if(parseInt(nextChoice)>0){
+    return nextChoice;
+  }
+  else{
+    var stillNoAlternative = "stillNoAlternative";
+    return stillNoAlternative;
+  }
+}
+
+function prepareChoices(fieldNumber){
+  computeEgocentricChoices();
+  possibleChoices = makeUnique(possibleChoices);
+  deletePossibleChoices(fieldNumber);
 }
 
 function withoutZero(array){
@@ -130,63 +148,77 @@ function withoutZero(array){
 function randomChoice(){  
   var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
   var nextChoice = choicesWithoutZero[possibleIndex];
-  var choiceString = 'field' + nextChoice;
-  alert("This is random choice");
-  setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
-}
+  //alert("choicesWithoutZero " + choicesWithoutZero);
+  //alert("possibleIndex " + possibleIndex);
+  //alert("nextchoice random: " + nextChoice);
+  return nextChoice;
+ }
 
-function recursiveChoice(k){
-  for(i=k;i<choicesWithoutZero.length;++i){
-    var possibleWin = parseInt(possibleChoices[i]);
-    if(gameRound>5){
-      for(j=0;j<computerResults.length;++j){
-        var addedChoices = parseInt(computerResults[j]);
-        if((determineWin(k,possibleWin,addedChoices))==true){alert("inner break");break;}
+function searchForWin(counter){
+  var noSuccess = "noSuccess";
+  withoutZero(possibleChoices);
+  if(choicesWithoutZero.length>0){
+    for(i=counter;i<choicesWithoutZero.length;++i){
+      var possibleWin = parseInt(choicesWithoutZero[i]);
+      if(gameRound>5){
+        var nextChoice = winInLastRounds(possibleWin);
+      }
+      else{
+        var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);
+          if(possibleWin + addedChoices == 15){
+            var nextChoice = possibleWin;break;
+          }
+          else{var nextChoice = "noWin";}
       }
     }
-    else{var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);
-        if((determineWin(k, possibleWin,addedChoices))==true){alert("outer break");break;}
-    }
-    alert("hi");
+    alert("next: " + nextChoice);
+    if(nextChoice==possibleWin){return nextChoice;}
+    else{return noSuccess;}
   }
-  alert("hallo");
+  else{return noSuccess;}
 }
 
-function determineWin(k, possibleWin, addedChoices){
-  if(possibleWin + addedChoices == 15){
-      var nextChoice = possibleWin;
-      var choiceString = 'field' + nextChoice;
-      alert("we have a winner!");
-      setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
+function winInLastRounds(possibleWin) {
+  for(j=0;j<computerResults.length;++j){
+    var addedChoices = parseInt(computerResults[j]); 
+    if(possibleWin + addedChoices == 15){
+      var nextChoice = possibleWin;break;
+    }
   }
-  else {
-    if (k == (choicesWithoutZero.length-1)){alert("End of loop!");return true;}
-    else {recursiveChoice(k+1);}
-  }
-  return true;
+  var stillNoSuccess = "stillNoSuccess";
+  alert("return value: " + nextChoice);
+  if(nextChoice){return nextChoice;} 
+  else {return stillNoSuccess;}
 }
 
 function computeEgocentricChoices(){
   for(i=0;i<fields.length;++i){
-    if (gameRound<=3){var adderIndex=0;}
-    else {var adderIndex = Math.floor(gameRound/3);}
     var firstPossible = fields[i];
-      for(j=0;j<fields.length;++j){
-        var secondPossible = fields[j];
-        var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-        if(secondPossible>0 && firstPossible> 0){
-          if(secondPossible != firstPossible){
-            var adder = 15-parseInt(computerChoices[adderIndex]);
-            if(adder > 0){
-              if(possibleAddedFields == adder){
-                possibleChoices = makeUnique(possibleChoices);
-                possibleChoices.push(firstPossible, secondPossible);
-              }
-            }
-          }
-        }
-      } 
+    for(j=0;j<fields.length;++j){
+      var secondPossible = fields[j];
+      manageChoices(firstPossible,secondPossible);
+    } 
   }
+}
+
+function manageChoices(firstPossible,secondPossible){
+  if(secondPossible>0 && firstPossible> 0){
+    if(secondPossible != firstPossible){
+      var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
+      var adder = parseInt(computeAdder());
+      if(adder > 0 && possibleAddedFields == adder){
+        possibleChoices = makeUnique(possibleChoices);
+        possibleChoices.push(firstPossible, secondPossible);
+      }
+    }
+  }
+}
+
+function computeAdder(){
+  if (gameRound<=3){var adderIndex=0;}
+  else {var adderIndex = Math.floor(gameRound/3);}
+  var adder = 15-parseInt(computerChoices[adderIndex]);
+  return adder;
 }
 
 function makeUnique(possibleChoices) {
