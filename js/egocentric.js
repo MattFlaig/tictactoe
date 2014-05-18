@@ -45,6 +45,7 @@ function managePlayerTurn(player, fieldNumber){
 function computerNextRound(fieldNumber) {
   if(gameRound<=1){
     withoutZero(fields);
+    deletePossibleChoices(fieldNumber);
     var computerChoice = randomChoice();
   }
   else {
@@ -61,10 +62,10 @@ function pushValue(player, fieldNumber){
 
 function deletePushedValue(fieldNumber){
     var toDeleteField = fields.indexOf(fieldNumber);
-      if(toDeleteField){
+      //if(toDeleteField){
         //alert("delete field: " + fields[toDeleteField]);
         fields.splice(toDeleteField,1, "0");
-      }
+      //}
 }
 
 function deletePossibleChoices(fieldNumber){
@@ -85,12 +86,17 @@ function egocentricStrategy(fieldNumber){
         var nextChoice = searchForWin(counter=0);
         alert("searchForWin: " + nextChoice);
         if (nextChoice=="noSuccess"){
-          var nextChoice = findAlternativeChoices();
+          nextChoice = findAlternativeChoices();
+          alert("First Alternative");
         }
       }
       else {
         var nextChoice = findAlternativeChoices();
+        alert("Second Alternative");
       }
+      alert("possible: " + possibleChoices);
+      alert("possible without Zero: " + choicesWithoutZero);
+      alert("next: " + nextChoice);
       return nextChoice;
 }
 
@@ -98,9 +104,15 @@ function findAlternativeChoices(){
   if(possibleChoices.length > 0 && possibleChoices != "0"){
     var nextChoice = getNextChoice(possibleChoices);
     alert("noSuccess - first alternative:" + nextChoice);
+  
+    if(nextChoice == "stillNoAlternative"){
+      alert("lastresort!");
+      nextChoice = getNextChoice(fields);
+    }
   }
   else{
-    var nextChoice = getNextChoice(fields);
+    nextChoice = getNextChoice(fields);
+    alert("totallastresort!");
   }
   return nextChoice;
 }
@@ -108,7 +120,13 @@ function findAlternativeChoices(){
 function getNextChoice(array){
   withoutZero(array);
   var nextChoice = randomChoice();
-  return nextChoice;
+  if(parseInt(nextChoice)>0){
+    return nextChoice;
+  }
+  else{
+    var stillNoAlternative = "stillNoAlternative";
+    return stillNoAlternative;
+  }
 }
 
 function prepareChoices(fieldNumber){
@@ -130,39 +148,47 @@ function withoutZero(array){
 function randomChoice(){  
   var possibleIndex = Math.floor(Math.random() * (choicesWithoutZero.length));
   var nextChoice = choicesWithoutZero[possibleIndex];
-  alert("choicesWithoutZero " + choicesWithoutZero);
-  alert("possibleIndex " + possibleIndex);
-  alert("nextchoice: " + nextChoice);
+  //alert("choicesWithoutZero " + choicesWithoutZero);
+  //alert("possibleIndex " + possibleIndex);
+  //alert("nextchoice random: " + nextChoice);
   return nextChoice;
  }
 
 function searchForWin(counter){
   var noSuccess = "noSuccess";
   withoutZero(possibleChoices);
-  for(i=counter;i<choicesWithoutZero.length;++i){
-    var possibleWin = parseInt(possibleChoices[i]);
-    if(gameRound>5){
-      for(j=0;j<computerResults.length;++j){
-        var addedChoices = parseInt(computerResults[j]); 
-        if(possibleWin + addedChoices == 15){
-          var nextChoice = possibleWin;break;
-        }
-        if(nextChoice==possibleWin){return nextChoice;}
-        //if((determineWin(counter,possibleWin,addedChoices))==true){break;}
+  if(choicesWithoutZero.length>0){
+    for(i=counter;i<choicesWithoutZero.length;++i){
+      var possibleWin = parseInt(choicesWithoutZero[i]);
+      if(gameRound>5){
+        var nextChoice = winInLastRounds(possibleWin);
       }
-      if(nextChoice==possibleWin){return nextChoice;}
+      else{
+        var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);
+          if(possibleWin + addedChoices == 15){
+            var nextChoice = possibleWin;break;
+          }
+          else{var nextChoice = "noWin";}
+      }
     }
-    else{var addedChoices = parseInt(computerChoices[0]) + parseInt(computerChoices[1]);
-        //if((determineWin(counter, possibleWin,addedChoices))==true){break;}
-        if(possibleWin + addedChoices == 15){
-          var nextChoice = possibleWin;break;
-        }
+    alert("next: " + nextChoice);
+    if(nextChoice==possibleWin){return nextChoice;}
+    else{return noSuccess;}
+  }
+  else{return noSuccess;}
+}
+
+function winInLastRounds(possibleWin) {
+  for(j=0;j<computerResults.length;++j){
+    var addedChoices = parseInt(computerResults[j]); 
+    if(possibleWin + addedChoices == 15){
+      var nextChoice = possibleWin;break;
     }
   }
-  if(nextChoice==possibleWin){return nextChoice;}
-  else{return noSuccess;}
-  alert("next: " + nextChoice);
-
+  var stillNoSuccess = "stillNoSuccess";
+  alert("return value: " + nextChoice);
+  if(nextChoice){return nextChoice;} 
+  else {return stillNoSuccess;}
 }
 
 function computeEgocentricChoices(){
