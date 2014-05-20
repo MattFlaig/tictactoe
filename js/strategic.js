@@ -1,9 +1,8 @@
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
   gameRound : 0,
-  computerChoices : [], computerResults : [],
-  userChoices : [], userResults : [],
-  possibleChoices : []
+  computerChoices : [], computerResults : [], computerPossibleChoices : [],
+  userChoices : [], userResults : [], userPossibleChoices : []
 }
 
 
@@ -17,39 +16,61 @@ function AskUser() {
 function loadImage(id, player, colour) {
     document.getElementById(id).style.background = colour;
     var fieldNumber = id[5];
-    pushValue(player, fieldNumber);
+    pushValue(fieldNumber,player);
     deletePushedValue(fieldNumber);
     if(globals.gameRound>=4){computeResult(player);}
     globals.gameRound += 1;
-    managePlayerTurn(player, fieldNumber);
+    managePlayerTurn(fieldNumber,player);
 }
 
-function managePlayerTurn(player, fieldNumber){
+function managePlayerTurn(fieldNumber, player){
     if (player == 'user'){
-        computerNextRound(fieldNumber);
+        deletePossibleChoices(fieldNumber, player);
         player = 'computer';
+        computerNextRound(fieldNumber, player);
+        
     }
     else {
-      deletePossibleChoices(fieldNumber);
+      deletePossibleChoices(fieldNumber, player);
       player = 'user';
     }
 }
 
-function computerNextRound(fieldNumber) {
-  if(globals.gameRound<=1){
-    deletePossibleChoices(fieldNumber);
+function computerNextRound(fieldNumber, player) {
+  if (globals.gameRound==0){
+    var computerChoice = '5';
+    globals.computerPossibleChoices = globals.fields;
+    globals.userPossibleChoices = globals.fields;
+  }
+  else if(globals.gameRound==1){
     var computerChoice = randomChoice('globals.fields');
   }
+  else if(globals.gameRound==2){
+    if(parseInt(fieldNumber)%2==0){
+      var computerChoice = 15 - (parseInt(fieldNumber) + parseInt(globals.computerChoices[0]));
+    }
+    else{
+      var computerChoice = findPossibleEdgeField();
+    }
+  }
   else {
-    var computerChoice = egocentricStrategy(fieldNumber);
+    var computerChoice = egocentricStrategy(fieldNumber,player);
   }
   var choiceString = 'field' + computerChoice; 
   setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
 }
 
-function pushValue(player, fieldNumber){
-    var playerChoice = eval('globals.' + player + 'Choices');
-    playerChoice.push(fieldNumber);
+function findPossibleEdgeField(){
+    var fieldOkay=false;
+    while (fieldOkay==false){
+      var possibleField = Math.floor(Math.random() * 8)+1;
+      if (possibleField%2==0){fieldOkay = true; return possibleField};
+    }
+}
+
+function pushValue(fieldNumber, player){
+    var playerChoice = 'globals.' + player + 'Choices';
+    eval(playerChoice).push(fieldNumber);
 }
 
 function deletePushedValue(fieldNumber){
@@ -57,32 +78,75 @@ function deletePushedValue(fieldNumber){
     globals.fields.splice(toDeleteField,1);
 }
 
-function deletePossibleChoices(fieldNumber){
-    for(i=0;i<globals.possibleChoices.length; ++i){
-    var checkDelete = globals.possibleChoices[i];
+function deletePossibleChoices(fieldNumber, player){
+    var choicesString = 'globals.' + player + 'PossibleChoices';
+    var possibleChoices = eval(choicesString);
+    for(i=0;i<possibleChoices.length; ++i){
+    var checkDelete = possibleChoices[i];
       if(checkDelete == fieldNumber){
-        globals.possibleChoices.splice(i, 1);
+        possibleChoices.splice(i, 1);
       }
     }
 }
 
-function egocentricStrategy(fieldNumber){
-    prepareChoices(fieldNumber);
-    if (globals.gameRound > 3){
-      var nextChoice = searchForWin();
+function egocentricStrategy(fieldNumber,player){
+    var possibleDilemmaMoves = [];
+    var dilemmaMoves = [];
+    var choicesString = 'globals.' + player + 'PossibleChoices';
+    var possibleChoices = eval(choicesString);
+    prepareChoices(fieldNumber,player);
+    //alert ("player: " + player);
+    if(globals.gameRound > 4){
+      var nextChoice = searchForWin(player);
       if (nextChoice=="noSuccess"){
-        nextChoice = findAlternativeChoices();
+        nextChoice = findAlternativeChoices(player);
       }
     }
-    else {
-      var nextChoice = findAlternativeChoices();
+    else if (globals.gameRound == 4){
+     
+      var nextChoice = searchForWin('user');
+      if (nextChoice=="noSuccess"){
+        for(i=0;i<possibleChoices.length;++i){
+          var possibleFirstMove = possibleChoices[i];
+          for(j=i+1;j<possibleChoices.length;++j){
+          var possibleSecondMove = possibleChoices[j];
+          var addedMoves = parseInt(possibleFirstMove) + parseInt(possibleSecondMove);
+            if((addedMoves + parseInt(globals.computerChoices[0])) == 15 || (addedMoves + parseInt(globals.computerChoices[1])) == 15){
+              possibleDilemmaMoves.push(possibleFirstMove,possibleSecondMove);
+            }
+            possibleDilemmaMoves = makeUnique(possibleDilemmaMoves);
+          }
+        }
+        
+
+        for(k=0;k<possibleDilemmaMoves.length;++k){
+        var possibleFirstDilemma = possibleDilemmaMoves[k];
+          for(l=0;l<possibleDilemmaMoves.length;++l){
+          var possibleSecondDilemma = possibleDilemmaMoves[l];
+            if (possibleFirstDilemma == possibleSecondDilemma){
+              dilemmaMoves.push(possibleFirstDilemma, possibleSecondDilemma);
+            }
+          }
+        }
+        alert("Dilemma moves: " + dilemmaMoves);
+        var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
+        nextChoice = dilemmaMoves[dilemmaIndex];
+      }
     }
+    else if(globals.gameRound < 4) {
+      if(parseInt(fieldNumber)%2==0){
+        var nextChoice = searchForWin('user');
+      }
+    }
+    //alert(nextChoice);
     return nextChoice;
 }
 
-function findAlternativeChoices(){
-  if(globals.possibleChoices.length > 0 && globals.possibleChoices != "0"){
-    var nextChoice = getNextChoice(globals.possibleChoices);
+function findAlternativeChoices(player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  if(possibleChoices.length > 0 && possibleChoices != "0"){
+    var nextChoice = getNextChoice(choicesString);
     if(nextChoice == "stillNoAlternative"){
       nextChoice = getNextChoice("globals.fields");
     }
@@ -104,10 +168,13 @@ function getNextChoice(array){
   }
 }
 
-function prepareChoices(fieldNumber){
-  computeEgocentricChoices();
-  globals.possibleChoices = makeUnique(globals.possibleChoices);
-  deletePossibleChoices(fieldNumber);
+function prepareChoices(fieldNumber,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  possibleChoices = makeUnique(possibleChoices);
+  computeEgocentricChoices(player, possibleChoices);
+
+  //deletePossibleChoices(fieldNumber,player);
 }
     
 function randomChoice(array){ 
@@ -117,58 +184,72 @@ function randomChoice(array){
   return nextChoice;
  }
 
-function searchForWin(){
+function searchForWin(player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  var playerString = 'globals.' + player + 'Choices';
+  var playerChoices = eval(playerString);
   var noSuccess = "noSuccess";
-  if(globals.possibleChoices.length>0){
-    for(i=0;i<globals.possibleChoices.length;++i){
-      var possibleWin = parseInt(globals.possibleChoices[i]);
+
+  if(possibleChoices.length>0){
+    for(i=0;i<possibleChoices.length;++i){
+      var possibleWin = parseInt(possibleChoices[i]);
       if(globals.gameRound>5){
-        var nextChoice = winInLastRounds(possibleWin);
+        var nextChoice = winInLastRounds(possibleWin,player);
+        if (nextChoice == possibleWin){break;}
       }
       else{
-        var addedChoices = parseInt(globals.computerChoices[0]) + parseInt(globals.computerChoices[1]);
+        var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
+        //alert("Added: " + addedChoices);
           if(possibleWin + addedChoices == 15){
             var nextChoice = possibleWin;break;
           }
-          else{var nextChoice = "noWin";}
+          else{var nextChoice = noSuccess;}
       }
     }
+    alert("next: " + nextChoice);
     if(nextChoice==possibleWin){return nextChoice;}
     else{return noSuccess;}
   }
   else{return noSuccess;}
 }
 
-function winInLastRounds(possibleWin) {
-  for(j=0;j<globals.computerResults.length;++j){
-    var addedChoices = parseInt(globals.computerResults[j]); 
+function winInLastRounds(possibleWin,player) {
+  var playerResults = eval('globals.' + player + 'Results');
+  //alert("results: " + playerResults);
+  for(j=0;j<playerResults.length;++j){
+    var addedChoices = parseInt(playerResults[j]); 
     if(possibleWin + addedChoices == 15){
       var nextChoice = possibleWin;break;
     }
   }
   var stillNoSuccess = "stillNoSuccess";
-  if(nextChoice){return nextChoice;} 
-  else {return stillNoSuccess;}
+  if(nextChoice==possibleWin){alert("Yippieh!");return nextChoice;} 
+  else {alert("Boing");return stillNoSuccess;}
 }
 
-function computeEgocentricChoices(){
+function computeEgocentricChoices(player){
   for(i=0;i<globals.fields.length;++i){
     var firstPossible = globals.fields[i];
     for(j=0;j<globals.fields.length;++j){
       var secondPossible = globals.fields[j];
-      manageChoices(firstPossible,secondPossible);
+      manageChoices(firstPossible,secondPossible,player);
     } 
   }
 }
 
-function manageChoices(firstPossible,secondPossible){
+function manageChoices(firstPossible,secondPossible,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  //alert(choicesString);
+  //alert(possibleChoices);
   if(secondPossible>0 && firstPossible> 0){
     if(secondPossible != firstPossible){
       var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
       var adder = parseInt(computeAdder());
       if(adder > 0 && possibleAddedFields == adder){
-        globals.possibleChoices = makeUnique(globals.possibleChoices);
-        globals.possibleChoices.push(firstPossible, secondPossible);
+        possibleChoices = makeUnique(possibleChoices);
+        possibleChoices.push(firstPossible, secondPossible);
       }
     }
   }
@@ -183,10 +264,10 @@ function computeAdder(){
 
 function makeUnique(possibleChoices) {
     var hash = {}, uniqueChoices = [];
-    for ( var i = 0; i < globals.possibleChoices.length; ++i ) {
-        if ( !hash.hasOwnProperty(globals.possibleChoices[i]) ) { 
-            hash[ globals.possibleChoices[i] ] = true;
-            uniqueChoices.push(globals.possibleChoices[i]);
+    for ( var i = 0; i < possibleChoices.length; ++i ) {
+        if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
+            hash[ possibleChoices[i] ] = true;
+            uniqueChoices.push(possibleChoices[i]);
         }
     }
     return uniqueChoices;
