@@ -104,12 +104,11 @@ function actualDelete(possibleChoices, fieldNumber){
 }
 
 function egocentricStrategy(fieldNumber,player){
-    var possibleDilemmaMoves = [];
-    var dilemmaMoves = [];
+   
     var choicesString = 'globals.' + player + 'PossibleChoices';
     var possibleChoices = eval(choicesString);
     prepareChoices(fieldNumber,player);
-    //alert ("player: " + player);
+
     if(globals.gameRound > 4){
       var nextChoice = searchForWin(player);
       if (nextChoice=="noSuccess"){
@@ -117,35 +116,9 @@ function egocentricStrategy(fieldNumber,player){
       }
     }
     else if (globals.gameRound == 4){
-     
       var nextChoice = searchForWin('user');
       if (nextChoice=="noSuccess"){
-        //alert("possible: " + possibleChoices);
-        for(i=0;i<possibleChoices.length;++i){
-          var first = possibleChoices[i]; //2,7,8,3
-
-          for(j=i+1;j<possibleChoices.length;++j){
-          var second = possibleChoices[j];
-          var firstComputerChoice = globals.computerChoices[0];
-          var secondComputerChoice = globals.computerChoices[1];
-          var firstPossible = parseInt(first) + parseInt(second) + parseInt(firstComputerChoice);
-          //alert("choice first:" + first);
-          //alert("choice second:" + second);
-          var secondPossible = parseInt(first) + parseInt(second) + parseInt(secondComputerChoice);
-          //alert(firstPossible);
-
-            if(firstPossible == 15 || secondPossible == 15){
-              possibleDilemmaMoves.push(first, second);
-            }
-          }
-        }
-        alert("before unique: " + possibleDilemmaMoves);
-        
-          dilemmaArray = findDilemma(possibleDilemmaMoves);
-          dilemmaMoves = makeUnique(dilemmaArray);
-          alert("dilemma moves: " + dilemmaMoves);
-        var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
-        nextChoice = dilemmaMoves[dilemmaIndex];
+        nextChoice = computeDilemma(possibleChoices);
       }
     }
     else if(globals.gameRound < 4) {
@@ -153,33 +126,51 @@ function egocentricStrategy(fieldNumber,player){
         var nextChoice = searchForWin('user');
       }
     }
-    //alert(nextChoice);
     return nextChoice;
+}
+
+function computeDilemma(possibleChoices){
+    //var possibleDilemmaMoves = [];
+    var dilemmaMoves = [];
+    var possibleDilemmaMoves = findPossibleDilemma(possibleChoices);
+    var dilemmaArray = findDilemma(possibleDilemmaMoves);
+    var dilemmaMoves = makeUnique(dilemmaArray);
+    var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
+    nextChoice = dilemmaMoves[dilemmaIndex];
+    return nextChoice;
+}
+
+function findPossibleDilemma(possibleChoices, possibleDilemmaMoves){
+  var possibleDilemmaMoves = [];
+  for(i=0;i<possibleChoices.length;++i){
+    var first = possibleChoices[i]; 
+    for(j=i+1;j<possibleChoices.length;++j){
+    var second = possibleChoices[j];
+    var firstPossible = parseInt(first) + parseInt(second) + parseInt(globals.computerChoices[0]);
+    var secondPossible = parseInt(first) + parseInt(second) + parseInt(globals.computerChoices[1]);
+      if(firstPossible == 15 || secondPossible == 15){
+        possibleDilemmaMoves.push(first, second);
+      }
+    }
+  }
+  return possibleDilemmaMoves;
 }
 
 function findDilemma(possibleDilemmaMoves){
   var dilemmaArray = [];
-  //alert("let's find it")
-  //alert(possibleDilemmaMoves);
-  //alert("possibleMove: " + possibleMove);
-
   for(k=0;k<possibleDilemmaMoves.length;++k){
     var counter = 0;
     var possibleMove = possibleDilemmaMoves[k];
     for(m=0; m<possibleDilemmaMoves.length;++m){
       var dilemmaMove = possibleDilemmaMoves[m];
-      //alert("possible moves: " + possibleDilemmaMoves);
-      //alert("dilemmaMove: " + dilemmaMove);
       if(dilemmaMove == possibleMove){
         counter += 1;
-        alert(counter);
         if(counter==2){
           dilemmaArray.push(possibleMove);
         }
       }
     }
   }
-  alert("array: " + dilemmaArray)
   return dilemmaArray;
 }
 
@@ -214,8 +205,6 @@ function prepareChoices(fieldNumber,player){
   var possibleChoices = eval(choicesString);
   possibleChoices = makeUnique(possibleChoices);
   computeEgocentricChoices(player, possibleChoices);
-
-  //deletePossibleChoices(fieldNumber,player);
 }
     
 function randomChoice(array){ 
@@ -241,11 +230,10 @@ function searchForWin(player){
       }
       else{
         var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
-        //alert("Added: " + addedChoices);
-          if(possibleWin + addedChoices == 15){
-            var nextChoice = possibleWin;break;
-          }
-          else{var nextChoice = noSuccess;}
+        if(possibleWin + addedChoices == 15){
+          var nextChoice = possibleWin;break;
+        }
+        else{var nextChoice = noSuccess;}
       }
     }
     alert("next: " + nextChoice);
@@ -257,7 +245,6 @@ function searchForWin(player){
 
 function winInLastRounds(possibleWin,player) {
   var playerResults = eval('globals.' + player + 'Results');
-  //alert("results: " + playerResults);
   for(j=0;j<playerResults.length;++j){
     var addedChoices = parseInt(playerResults[j]); 
     if(possibleWin + addedChoices == 15){
@@ -282,8 +269,6 @@ function computeEgocentricChoices(player, possibleChoices){
 function manageChoices(firstPossible,secondPossible,player){
   var choicesString = 'globals.' + player + 'PossibleChoices';
   var possibleChoices = eval(choicesString);
-  //alert(choicesString);
-  //alert(possibleChoices);
   if(secondPossible>0 && firstPossible> 0){
     if(secondPossible != firstPossible){
       var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
