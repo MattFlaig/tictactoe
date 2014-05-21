@@ -56,7 +56,7 @@ function computerNextRound(fieldNumber, player) {
     }
   }
   else {
-    var computerChoice = egocentricStrategy(fieldNumber,player);
+    var computerChoice = balancedStrategy(fieldNumber,player);
   }
   var choiceString = 'field' + computerChoice; 
   setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
@@ -85,10 +85,10 @@ function deletePushedValue(fieldNumber){
 
 function deletePossibleChoices(fieldNumber){
     //alert("Delete now!")
-    var possibleUser = globals.userPossibleChoices;
-    var possibleComputer = globals.computerPossibleChoices;
-    actualDelete(possibleUser, fieldNumber);
-    actualDelete(possibleComputer, fieldNumber);
+    var possibleForUser = globals.userPossibleChoices;
+    var possibleForComputer = globals.computerPossibleChoices;
+    actualDelete(possibleForUser, fieldNumber);
+    actualDelete(possibleForComputer, fieldNumber);
 }
 
 
@@ -103,7 +103,7 @@ function actualDelete(possibleChoices, fieldNumber){
     }
 }
 
-function egocentricStrategy(fieldNumber,player){
+function balancedStrategy(fieldNumber,player){
    
     var choicesString = 'globals.' + player + 'PossibleChoices';
     var possibleChoices = eval(choicesString);
@@ -117,6 +117,7 @@ function egocentricStrategy(fieldNumber,player){
     }
     else if (globals.gameRound == 4){
       var nextChoice = searchForWin('user');
+      //alert(nextChoice);
       if (nextChoice=="noSuccess"){
         nextChoice = computeDilemma(possibleChoices);
       }
@@ -131,10 +132,14 @@ function egocentricStrategy(fieldNumber,player){
 
 function computeDilemma(possibleChoices){
     //var possibleDilemmaMoves = [];
+    alert("trying to compute dilemma");
     var dilemmaMoves = [];
     var possibleDilemmaMoves = findPossibleDilemma(possibleChoices);
-    var dilemmaArray = findDilemma(possibleDilemmaMoves);
-    var dilemmaMoves = makeUnique(dilemmaArray);
+    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
+    alert("possibleDilemmaMoves: " + possibleDilemmaMoves);
+    //var dilemmaArray = findDilemma(possibleDilemmaMoves);
+    //alert("dilemmaArray: " + dilemmaArray);
+    //var dilemmaMoves = makeUnique(dilemmaArray);
     var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
     nextChoice = dilemmaMoves[dilemmaIndex];
     return nextChoice;
@@ -153,6 +158,7 @@ function findPossibleDilemma(possibleChoices, possibleDilemmaMoves){
       }
     }
   }
+  alert("possibleDilemma " + possibleDilemmaMoves);
   return possibleDilemmaMoves;
 }
 
@@ -171,6 +177,7 @@ function findDilemma(possibleDilemmaMoves){
       }
     }
   }
+  alert("Dilemmaarray: " + dilemmaArray);
   return dilemmaArray;
 }
 
@@ -185,6 +192,7 @@ function findAlternativeChoices(player){
   }
   else{nextChoice = getNextChoice("globals.fields");}
   return nextChoice;
+  alert("alternativeChoice: " + nextChoice);
 }
 
 function getNextChoice(array){
@@ -203,7 +211,7 @@ function getNextChoice(array){
 function prepareChoices(fieldNumber,player){
   var choicesString = 'globals.' + player + 'PossibleChoices';
   var possibleChoices = eval(choicesString);
-  possibleChoices = makeUnique(possibleChoices);
+  possibleChoices = getUniqueOrDouble(possibleChoices);
   computeEgocentricChoices(player, possibleChoices);
 }
     
@@ -215,32 +223,35 @@ function randomChoice(array){
  }
 
 function searchForWin(player){
-  var choicesString = 'globals.' + player + 'PossibleChoices';
-  var possibleChoices = eval(choicesString);
-  var playerString = 'globals.' + player + 'Choices';
-  var playerChoices = eval(playerString);
+  var choicesString = 'globals.' + player + 'PossibleChoices', possibleChoices = eval(choicesString);
+  var playerString = 'globals.' + player + 'Choices', playerChoices = eval(playerString);
   var noSuccess = "noSuccess";
 
   if(possibleChoices.length>0){
-    for(i=0;i<possibleChoices.length;++i){
-      var possibleWin = parseInt(possibleChoices[i]);
-      if(globals.gameRound>5){
-        var nextChoice = winInLastRounds(possibleWin,player);
-        if (nextChoice == possibleWin){break;}
-      }
-      else{
-        var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
-        if(possibleWin + addedChoices == 15){
-          var nextChoice = possibleWin;break;
-        }
-        else{var nextChoice = noSuccess;}
-      }
-    }
+    nextChoice = getWinningMove(possibleChoices, player, noSuccess, playerChoices);
     alert("next: " + nextChoice);
-    if(nextChoice==possibleWin){return nextChoice;}
+    if(nextChoice){return nextChoice;}
     else{return noSuccess;}
   }
   else{return noSuccess;}
+}
+
+function getWinningMove(possibleChoices, player, noSuccess, playerChoices){
+  for(i=0;i<possibleChoices.length;++i){
+    var possibleWin = parseInt(possibleChoices[i]);
+    if(globals.gameRound>5){
+      var nextChoice = winInLastRounds(possibleWin,player);
+      if (nextChoice == possibleWin){break;}
+    }
+    else{
+      var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
+      if(possibleWin + addedChoices == 15){
+        var nextChoice = possibleWin;break;
+      }
+      else{var nextChoice = noSuccess;}
+    }
+  }
+  return nextChoice;
 }
 
 function winInLastRounds(possibleWin,player) {
@@ -251,7 +262,7 @@ function winInLastRounds(possibleWin,player) {
       var nextChoice = possibleWin;break;
     }
   }
-  var stillNoSuccess = "stillNoSuccess";
+  var stillNoSuccess = "noSuccess";
   if(nextChoice==possibleWin){alert("Yippieh!");return nextChoice;} 
   else {alert("Boing");return stillNoSuccess;}
 }
@@ -274,7 +285,7 @@ function manageChoices(firstPossible,secondPossible,player){
       var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
       var adder = parseInt(computeAdder());
       if(adder > 0 && possibleAddedFields == adder){
-        possibleChoices = makeUnique(possibleChoices);
+        possibleChoices = getUniqueOrDouble(possibleChoices);
         possibleChoices.push(firstPossible, secondPossible);
       }
     }
@@ -288,15 +299,17 @@ function computeAdder(){
   return adder;
 }
 
-function makeUnique(possibleChoices) {
-    var hash = {}, uniqueChoices = [];
+function getUniqueOrDouble(possibleChoices, doubled) {
+    var hash = {}, uniqueChoices = [], doubleChoices = [];
     for ( var i = 0; i < possibleChoices.length; ++i ) {
         if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
             hash[ possibleChoices[i] ] = true;
             uniqueChoices.push(possibleChoices[i]);
         }
+        else {doubleChoices.push(possibleChoices[i]);}
     }
-    return uniqueChoices;
+    if(doubled){alert("Double: " + doubleChoices);return doubleChoices;}
+    else{return uniqueChoices;}
 }
 
 function computeResult(player){
