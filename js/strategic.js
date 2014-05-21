@@ -1,8 +1,8 @@
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
   gameRound : 0,
-  computerChoices : [], computerResults : [], computerPossibleChoices : [],
-  userChoices : [], userResults : [], userPossibleChoices : []
+  computerChoices : [], computerResults : [], computerPossibleChoices : ["2","9","4","7","5","3","6","1","8"],
+  userChoices : [], userResults : [], userPossibleChoices : ["2","9","4","7","5","3","6","1","8"]
 }
 
 
@@ -16,7 +16,9 @@ function AskUser() {
 function loadImage(id, player, colour) {
     document.getElementById(id).style.background = colour;
     var fieldNumber = id[5];
+    deletePossibleChoices(fieldNumber, player);
     pushValue(fieldNumber,player);
+    //alert("fieldNumber: " + fieldNumber);
     deletePushedValue(fieldNumber);
     if(globals.gameRound>=4){computeResult(player);}
     globals.gameRound += 1;
@@ -25,13 +27,13 @@ function loadImage(id, player, colour) {
 
 function managePlayerTurn(fieldNumber, player){
     if (player == 'user'){
-        deletePossibleChoices(fieldNumber, player);
-        player = 'computer';
-        computerNextRound(fieldNumber, player);
         
+        //deletePossibleChoices(fieldNumber, player);
+        player = 'computer';
+        computerNextRound(fieldNumber, player);  
     }
     else {
-      deletePossibleChoices(fieldNumber, player);
+      //deletePossibleChoices(fieldNumber, player);
       player = 'user';
     }
 }
@@ -39,8 +41,8 @@ function managePlayerTurn(fieldNumber, player){
 function computerNextRound(fieldNumber, player) {
   if (globals.gameRound==0){
     var computerChoice = '5';
-    globals.computerPossibleChoices = globals.fields;
-    globals.userPossibleChoices = globals.fields;
+    //globals.computerPossibleChoices = globals.fields;
+    //globals.userPossibleChoices = globals.fields;
   }
   else if(globals.gameRound==1){
     var computerChoice = randomChoice('globals.fields');
@@ -75,15 +77,27 @@ function pushValue(fieldNumber, player){
 
 function deletePushedValue(fieldNumber){
     var toDeleteField = globals.fields.indexOf(fieldNumber);
+    //alert("Field to delete: " + toDeleteField);
+    //alert("fields before delete: " + globals.fields);
     globals.fields.splice(toDeleteField,1);
+    //alert("fields after delete: " + globals.fields);
 }
 
-function deletePossibleChoices(fieldNumber, player){
-    var choicesString = 'globals.' + player + 'PossibleChoices';
-    var possibleChoices = eval(choicesString);
+function deletePossibleChoices(fieldNumber){
+    //alert("Delete now!")
+    var possibleUser = globals.userPossibleChoices;
+    var possibleComputer = globals.computerPossibleChoices;
+    actualDelete(possibleUser, fieldNumber);
+    actualDelete(possibleComputer, fieldNumber);
+}
+
+
+function actualDelete(possibleChoices, fieldNumber){
+    //alert("Delete from: " + possibleChoices);
     for(i=0;i<possibleChoices.length; ++i){
     var checkDelete = possibleChoices[i];
       if(checkDelete == fieldNumber){
+        //alert("Delete: " + checkDelete);
         possibleChoices.splice(i, 1);
       }
     }
@@ -106,29 +120,30 @@ function egocentricStrategy(fieldNumber,player){
      
       var nextChoice = searchForWin('user');
       if (nextChoice=="noSuccess"){
+        //alert("possible: " + possibleChoices);
         for(i=0;i<possibleChoices.length;++i){
-          var possibleFirstMove = possibleChoices[i];
-          for(j=i+1;j<possibleChoices.length;++j){
-          var possibleSecondMove = possibleChoices[j];
-          var addedMoves = parseInt(possibleFirstMove) + parseInt(possibleSecondMove);
-            if((addedMoves + parseInt(globals.computerChoices[0])) == 15 || (addedMoves + parseInt(globals.computerChoices[1])) == 15){
-              possibleDilemmaMoves.push(possibleFirstMove,possibleSecondMove);
-            }
-            possibleDilemmaMoves = makeUnique(possibleDilemmaMoves);
-          }
-        }
-        
+          var first = possibleChoices[i]; //2,7,8,3
 
-        for(k=0;k<possibleDilemmaMoves.length;++k){
-        var possibleFirstDilemma = possibleDilemmaMoves[k];
-          for(l=0;l<possibleDilemmaMoves.length;++l){
-          var possibleSecondDilemma = possibleDilemmaMoves[l];
-            if (possibleFirstDilemma == possibleSecondDilemma){
-              dilemmaMoves.push(possibleFirstDilemma, possibleSecondDilemma);
+          for(j=i+1;j<possibleChoices.length;++j){
+          var second = possibleChoices[j];
+          var firstComputerChoice = globals.computerChoices[0];
+          var secondComputerChoice = globals.computerChoices[1];
+          var firstPossible = parseInt(first) + parseInt(second) + parseInt(firstComputerChoice);
+          //alert("choice first:" + first);
+          //alert("choice second:" + second);
+          var secondPossible = parseInt(first) + parseInt(second) + parseInt(secondComputerChoice);
+          //alert(firstPossible);
+
+            if(firstPossible == 15 || secondPossible == 15){
+              possibleDilemmaMoves.push(first, second);
             }
           }
         }
-        alert("Dilemma moves: " + dilemmaMoves);
+        alert("before unique: " + possibleDilemmaMoves);
+        
+          dilemmaArray = findDilemma(possibleDilemmaMoves);
+          dilemmaMoves = makeUnique(dilemmaArray);
+          alert("dilemma moves: " + dilemmaMoves);
         var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
         nextChoice = dilemmaMoves[dilemmaIndex];
       }
@@ -140,6 +155,32 @@ function egocentricStrategy(fieldNumber,player){
     }
     //alert(nextChoice);
     return nextChoice;
+}
+
+function findDilemma(possibleDilemmaMoves){
+  var dilemmaArray = [];
+  //alert("let's find it")
+  //alert(possibleDilemmaMoves);
+  //alert("possibleMove: " + possibleMove);
+
+  for(k=0;k<possibleDilemmaMoves.length;++k){
+    var counter = 0;
+    var possibleMove = possibleDilemmaMoves[k];
+    for(m=0; m<possibleDilemmaMoves.length;++m){
+      var dilemmaMove = possibleDilemmaMoves[m];
+      //alert("possible moves: " + possibleDilemmaMoves);
+      //alert("dilemmaMove: " + dilemmaMove);
+      if(dilemmaMove == possibleMove){
+        counter += 1;
+        alert(counter);
+        if(counter==2){
+          dilemmaArray.push(possibleMove);
+        }
+      }
+    }
+  }
+  alert("array: " + dilemmaArray)
+  return dilemmaArray;
 }
 
 function findAlternativeChoices(player){
@@ -228,11 +269,11 @@ function winInLastRounds(possibleWin,player) {
   else {alert("Boing");return stillNoSuccess;}
 }
 
-function computeEgocentricChoices(player){
-  for(i=0;i<globals.fields.length;++i){
+function computeEgocentricChoices(player, possibleChoices){
+  for(i=0;i<possibleChoices.length;++i){
     var firstPossible = globals.fields[i];
-    for(j=0;j<globals.fields.length;++j){
-      var secondPossible = globals.fields[j];
+    for(j=0;j<possibleChoices.length;++j){
+      var secondPossible = possibleChoices[j];
       manageChoices(firstPossible,secondPossible,player);
     } 
   }
