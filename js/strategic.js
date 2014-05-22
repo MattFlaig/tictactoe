@@ -27,33 +27,38 @@ function loadImage(id, player, colour) {
 
 function managePlayerTurn(fieldNumber, player){
     if (player == 'user'){
-        
-        //deletePossibleChoices(fieldNumber, player);
         player = 'computer';
         computerNextRound(fieldNumber, player);  
     }
     else {
-      //deletePossibleChoices(fieldNumber, player);
-      player = 'user';
+        player = 'user';
     }
 }
 
 function computerNextRound(fieldNumber, player) {
-  if (globals.gameRound==0){
-    var computerChoice = '5';
-    //globals.computerPossibleChoices = globals.fields;
-    //globals.userPossibleChoices = globals.fields;
+  if(globals.gameRound<=1){
+    if(fieldnumber && fieldnumber == 5){var computerChoice = findPossibleEdgeField();}
+    else{var computerChoice = '5';}
   }
-  else if(globals.gameRound==1){
-    var computerChoice = randomChoice('globals.fields');
-  }
-  else if(globals.gameRound==2){
-    if(parseInt(fieldNumber)%2==0){
-      var computerChoice = 15 - (parseInt(fieldNumber) + parseInt(globals.computerChoices[0]));
+  else if(globals.gameRound==2 || globals.gameRound==3){
+    var computerChoice = searchForWin('user');
+    if (computerChoice=="noSuccess"){
+      computerChoice=computeDilemma(globals.userPossibleChoices, 'user');
+      if (typeof computerChoice == "undefined"){
+      
+
+      }
     }
-    else{
-      var computerChoice = findPossibleEdgeField();
-    }
+
+
+
+
+    // if(parseInt(fieldNumber)%2==0){
+    //   var computerChoice = 15 - (parseInt(fieldNumber) + parseInt(globals.computerChoices[0]));
+    // }
+    // else{
+    //   var computerChoice = findPossibleEdgeField();
+    // }
   }
   else {
     var computerChoice = balancedStrategy(fieldNumber,player);
@@ -77,10 +82,7 @@ function pushValue(fieldNumber, player){
 
 function deletePushedValue(fieldNumber){
     var toDeleteField = globals.fields.indexOf(fieldNumber);
-    //alert("Field to delete: " + toDeleteField);
-    //alert("fields before delete: " + globals.fields);
     globals.fields.splice(toDeleteField,1);
-    //alert("fields after delete: " + globals.fields);
 }
 
 function deletePossibleChoices(fieldNumber){
@@ -93,11 +95,9 @@ function deletePossibleChoices(fieldNumber){
 
 
 function actualDelete(possibleChoices, fieldNumber){
-    //alert("Delete from: " + possibleChoices);
     for(i=0;i<possibleChoices.length; ++i){
     var checkDelete = possibleChoices[i];
       if(checkDelete == fieldNumber){
-        //alert("Delete: " + checkDelete);
         possibleChoices.splice(i, 1);
       }
     }
@@ -109,20 +109,23 @@ function balancedStrategy(fieldNumber,player){
     var possibleChoices = eval(choicesString);
     prepareChoices(fieldNumber,player);
 
-    if(globals.gameRound > 4){
+    if (globals.gameRound >= 4){
       var nextChoice = searchForWin(player);
-      if (nextChoice=="noSuccess"){
-        nextChoice = findAlternativeChoices(player);
-      }
-    }
-    else if (globals.gameRound == 4){
-      var nextChoice = searchForWin('user');
       //alert(nextChoice);
       if (nextChoice=="noSuccess"){
-        nextChoice = computeDilemma(possibleChoices);
+        nextChoice = searchForWin('user');
+        if (nextChoice=="noSuccess"){
+          nextChoice = computeDilemma(possibleChoices, player);
+          if (typeof nextChoice == "undefined"){
+            nextChoice = computeDilemma(possibleChoices, 'user');
+            if (typeof nextChoice == "undefined"){
+              nextChoice = findAlternativeChoices(player);
+            }
+          }
+        }
       }
     }
-    else if(globals.gameRound < 4) {
+    else {
       if(parseInt(fieldNumber)%2==0){
         var nextChoice = searchForWin('user');
       }
@@ -130,29 +133,26 @@ function balancedStrategy(fieldNumber,player){
     return nextChoice;
 }
 
-function computeDilemma(possibleChoices){
-    //var possibleDilemmaMoves = [];
+function computeDilemma(possibleChoices, player){
     alert("trying to compute dilemma");
     var dilemmaMoves = [];
-    var possibleDilemmaMoves = findPossibleDilemma(possibleChoices);
-    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
+    var possibleDilemmaMoves = findPossibleDilemma(possibleChoices, player);
+    dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
     alert("possibleDilemmaMoves: " + possibleDilemmaMoves);
-    //var dilemmaArray = findDilemma(possibleDilemmaMoves);
-    //alert("dilemmaArray: " + dilemmaArray);
-    //var dilemmaMoves = makeUnique(dilemmaArray);
     var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
     nextChoice = dilemmaMoves[dilemmaIndex];
     return nextChoice;
 }
 
-function findPossibleDilemma(possibleChoices, possibleDilemmaMoves){
-  var possibleDilemmaMoves = [];
+function findPossibleDilemma(possibleChoices, player){
+  var playerString = 'globals.' + player + 'Choices';
+  var playerChoice = eval(playerString), possibleDilemmaMoves = [];
   for(i=0;i<possibleChoices.length;++i){
     var first = possibleChoices[i]; 
     for(j=i+1;j<possibleChoices.length;++j){
     var second = possibleChoices[j];
-    var firstPossible = parseInt(first) + parseInt(second) + parseInt(globals.computerChoices[0]);
-    var secondPossible = parseInt(first) + parseInt(second) + parseInt(globals.computerChoices[1]);
+    var firstPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[0]);
+    var secondPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[1]);
       if(firstPossible == 15 || secondPossible == 15){
         possibleDilemmaMoves.push(first, second);
       }
@@ -160,25 +160,6 @@ function findPossibleDilemma(possibleChoices, possibleDilemmaMoves){
   }
   alert("possibleDilemma " + possibleDilemmaMoves);
   return possibleDilemmaMoves;
-}
-
-function findDilemma(possibleDilemmaMoves){
-  var dilemmaArray = [];
-  for(k=0;k<possibleDilemmaMoves.length;++k){
-    var counter = 0;
-    var possibleMove = possibleDilemmaMoves[k];
-    for(m=0; m<possibleDilemmaMoves.length;++m){
-      var dilemmaMove = possibleDilemmaMoves[m];
-      if(dilemmaMove == possibleMove){
-        counter += 1;
-        if(counter==2){
-          dilemmaArray.push(possibleMove);
-        }
-      }
-    }
-  }
-  alert("Dilemmaarray: " + dilemmaArray);
-  return dilemmaArray;
 }
 
 function findAlternativeChoices(player){
@@ -196,7 +177,6 @@ function findAlternativeChoices(player){
 }
 
 function getNextChoice(array){
-  
   var stringArray = eval(array);
   var nextChoice = randomChoice(stringArray);
   if(parseInt(nextChoice)>0){
@@ -280,15 +260,17 @@ function computeEgocentricChoices(player, possibleChoices){
 function manageChoices(firstPossible,secondPossible,player){
   var choicesString = 'globals.' + player + 'PossibleChoices';
   var possibleChoices = eval(choicesString);
-  if(secondPossible>0 && firstPossible> 0){
     if(secondPossible != firstPossible){
-      var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-      var adder = parseInt(computeAdder());
-      if(adder > 0 && possibleAddedFields == adder){
-        possibleChoices = getUniqueOrDouble(possibleChoices);
-        possibleChoices.push(firstPossible, secondPossible);
-      }
+      manageActualChoices(firstPossible,secondPossible,possibleChoices);
     }
+}
+
+function manageActualChoices(firstPossible,secondPossible,possibleChoices){
+  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
+  var adder = parseInt(computeAdder());
+  if(adder > 0 && possibleAddedFields == adder){
+    possibleChoices = getUniqueOrDouble(possibleChoices);
+    possibleChoices.push(firstPossible, secondPossible);
   }
 }
 
