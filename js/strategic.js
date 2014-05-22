@@ -37,7 +37,7 @@ function managePlayerTurn(fieldNumber, player){
 
 function computerNextRound(fieldNumber, player) {
   if(globals.gameRound<=1){
-    if(fieldnumber && fieldnumber == 5){var computerChoice = findPossibleEdgeField();}
+    if(fieldNumber && fieldNumber == 5){var computerChoice = findPossibleEdgeField(globals.fields);}
     else{var computerChoice = '5';}
   }
   else if(globals.gameRound==2 || globals.gameRound==3){
@@ -45,14 +45,17 @@ function computerNextRound(fieldNumber, player) {
     if (computerChoice=="noSuccess"){
       computerChoice=computeDilemma(globals.userPossibleChoices, 'user');
       if (typeof computerChoice == "undefined"){
-      
-
+        var firstMove = parseInt(globals.userChoices[0]), secondMove = parseInt(globals.userChoices[1]);
+        if(firstMove%2!=0 && secondMove%2!=0){
+          if (firstMove != 5){var computerChoice = findPossibleEdgeField(globals.fields);}
+          else {var computerChoice = findPossibleOddField(globals.fields);}
+        }
+        else{
+          if(firstMove+secondMove%2 != 0){var computerChoice = findPossibleEdgeField(globals.fields);}
+          else {var computerChoice = findPossibleOddField(globals.fields);} //evtl statt fields possible choices
+        }
       }
     }
-
-
-
-
     // if(parseInt(fieldNumber)%2==0){
     //   var computerChoice = 15 - (parseInt(fieldNumber) + parseInt(globals.computerChoices[0]));
     // }
@@ -67,12 +70,22 @@ function computerNextRound(fieldNumber, player) {
   setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000);
 }
 
-function findPossibleEdgeField(){
-    var fieldOkay=false;
-    while (fieldOkay==false){
-      var possibleField = Math.floor(Math.random() * 8)+1;
-      if (possibleField%2==0){fieldOkay = true; return possibleField};
-    }
+function findPossibleOddField(fields){
+  var fieldOkay=false;
+  while (fieldOkay==false){
+    var possibleIndex = Math.floor(Math.random() * fields.length);
+    var possibleField = fields[possibleIndex];
+    if (possibleField%2!=0){fieldOkay = true; return possibleField};
+  }
+}
+
+function findPossibleEdgeField(fields){
+  var fieldOkay=false;
+  while (fieldOkay==false){
+    var possibleIndex = Math.floor(Math.random() * fields.length);
+    var possibleField = fields[possibleIndex];
+    if (possibleField%2==0){fieldOkay = true; return possibleField};
+  }
 }
 
 function pushValue(fieldNumber, player){
@@ -113,6 +126,7 @@ function balancedStrategy(fieldNumber,player){
       var nextChoice = searchForWin(player);
       //alert(nextChoice);
       if (nextChoice=="noSuccess"){
+        alert("Let's look if someones winning");
         nextChoice = searchForWin('user');
         if (nextChoice=="noSuccess"){
           nextChoice = computeDilemma(possibleChoices, player);
@@ -141,7 +155,8 @@ function computeDilemma(possibleChoices, player){
     alert("possibleDilemmaMoves: " + possibleDilemmaMoves);
     var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
     nextChoice = dilemmaMoves[dilemmaIndex];
-    return nextChoice;
+    if (dilemmaMoves.length<=3){return nextChoice;}
+    else {return undefined};
 }
 
 function findPossibleDilemma(possibleChoices, player){
@@ -219,14 +234,14 @@ function searchForWin(player){
 function getWinningMove(possibleChoices, player, noSuccess, playerChoices){
   for(i=0;i<possibleChoices.length;++i){
     var possibleWin = parseInt(possibleChoices[i]);
-    if(globals.gameRound>5){
+    if(globals.gameRound>=5){
       var nextChoice = winInLastRounds(possibleWin,player);
       if (nextChoice == possibleWin){break;}
     }
     else{
       var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
       if(possibleWin + addedChoices == 15){
-        var nextChoice = possibleWin;break;
+        var nextChoice = possibleWin;alert("got you!");break;
       }
       else{var nextChoice = noSuccess;}
     }
