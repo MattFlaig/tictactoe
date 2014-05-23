@@ -15,7 +15,7 @@ function AskUser() {
 
 function manageGame(id, player, colour){
     var fieldNumber = id[5];
-    loadImage(id, player, colour);
+    loadImage(id, colour);
     pushValue(fieldNumber,player);
     manageDeletion(fieldNumber,player);
     if(globals.gameRound>=4){computeResult(player);}
@@ -23,7 +23,7 @@ function manageGame(id, player, colour){
     managePlayerTurn(fieldNumber,player);
 }
 
-function loadImage(id, player, colour) {
+function loadImage(id, colour) {
     document.getElementById(id).style.background = colour;
 }
 
@@ -63,6 +63,9 @@ function findSecondComputerMove(){
 function findNonReactiveChoice(firstUserMove, secondUserMove){
   if(globals.computerChoices[0] == 5 && firstUserMove%2==0 && secondUserMove%2==0){
     var computerChoice = findPossibleOddField(globals.fields);
+  }
+  else if (globals.computerChoices[0] == 5 && firstUserMove%2==0){
+    var computerChoice = 10 - firstUserMove;
   }
   else{
     var computerChoice=computeDilemma(globals.userPossibleChoices, 'user');
