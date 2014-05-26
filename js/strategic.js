@@ -1,3 +1,4 @@
+//namespace for global variables
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
   gameRound : 0,
@@ -13,6 +14,7 @@ function AskUser() {
     }
 }
 
+//function for game engine
 function manageGame(id, player, colour){
     var fieldNumber = id[5];
     loadImage(id, colour);
@@ -20,24 +22,67 @@ function manageGame(id, player, colour){
     manageDeletion(fieldNumber,player);
     if(globals.gameRound>=4){computeResult(player);}
     globals.gameRound += 1;
-    managePlayerTurn(fieldNumber,player);
+    managePlayerTurn(fieldNumber, player);
 }
 
 function loadImage(id, colour) {
     document.getElementById(id).style.background = colour;
 }
 
+function pushValue(fieldNumber, player){
+    var playerChoice = 'globals.' + player + 'Choices';
+    eval(playerChoice).push(fieldNumber);
+}
+
+
+
+//functions to delete chosen moves from total fields and possible choices
+//fields are all remaining empty fields
+//possible choices are all fields where there is still a possibility to win
+
 function manageDeletion(fieldNumber,player){
   deletePossibleChoices(fieldNumber, player);
   deleteFields(fieldNumber);
 }
 
-function managePlayerTurn(fieldNumber, player){
-    if (player == 'user'){player = 'computer';computerNextRound(fieldNumber, player);}
-    else {player = 'user';}
+function deleteFields(fieldNumber){
+    var toDeleteField = globals.fields.indexOf(fieldNumber);
+    globals.fields.splice(toDeleteField,1);
 }
 
+function deletePossibleChoices(fieldNumber){
+    var possibleForUser = globals.userPossibleChoices;
+    var possibleForComputer = globals.computerPossibleChoices;
+    actualDelete(possibleForUser, fieldNumber);
+    actualDelete(possibleForComputer, fieldNumber);
+}
+
+function actualDelete(possibleChoices, fieldNumber){
+    for(i=0;i<possibleChoices.length; ++i){
+    var checkDelete = possibleChoices[i];
+      if(checkDelete == fieldNumber){
+        possibleChoices.splice(i, 1);
+      }
+    }
+}
+
+
+//to manage who's turn it is
+function managePlayerTurn(fieldNumber, player){
+    if (player == 'user'){
+      player = 'computer';
+      computerNextRound(fieldNumber, player);
+    }
+    else {
+      player = 'user';
+    }
+}
+
+
+
+//different strategies for computer, depending on game round
 function computerNextRound(fieldNumber, player) {
+  
   if(globals.gameRound<=1){var computerChoice = findFirstComputerMove(fieldNumber);}
   else if(globals.gameRound==2 || globals.gameRound==3){var computerChoice = findSecondComputerMove();}
   else {var computerChoice = balancedStrategy(fieldNumber,player);}
@@ -45,6 +90,7 @@ function computerNextRound(fieldNumber, player) {
   setTimeout(function(){manageGame(choiceString, 'computer', 'blue')}, 1000);
 }
 
+//strategy for computer's first two moves
 function findFirstComputerMove(fieldNumber){
   if(fieldNumber && fieldNumber == 5){var computerChoice = findPossibleEdgeField(globals.fields);}
   else{var computerChoice = '5';}
@@ -60,6 +106,7 @@ function findSecondComputerMove(){
   return computerChoice;
 }
 
+//find computer move depending on first two user choices
 function findNonReactiveChoice(firstUserMove, secondUserMove){
   if(globals.computerChoices[0] == 5 && firstUserMove%2==0 && secondUserMove%2==0){
     var computerChoice = findPossibleOddField(globals.fields);
@@ -106,33 +153,10 @@ function findPossibleEdgeField(fields){
   }
 }
 
-function pushValue(fieldNumber, player){
-    var playerChoice = 'globals.' + player + 'Choices';
-    eval(playerChoice).push(fieldNumber);
-}
-
-function deleteFields(fieldNumber){
-    var toDeleteField = globals.fields.indexOf(fieldNumber);
-    globals.fields.splice(toDeleteField,1);
-}
-
-function deletePossibleChoices(fieldNumber){
-    var possibleForUser = globals.userPossibleChoices;
-    var possibleForComputer = globals.computerPossibleChoices;
-    actualDelete(possibleForUser, fieldNumber);
-    actualDelete(possibleForComputer, fieldNumber);
-}
 
 
-function actualDelete(possibleChoices, fieldNumber){
-    for(i=0;i<possibleChoices.length; ++i){
-    var checkDelete = possibleChoices[i];
-      if(checkDelete == fieldNumber){
-        possibleChoices.splice(i, 1);
-      }
-    }
-}
 
+//strategy for last two computer moves
 function balancedStrategy(fieldNumber,player){
     var choicesString = 'globals.' + player + 'PossibleChoices';
     var possibleChoices = eval(choicesString);
@@ -144,6 +168,73 @@ function balancedStrategy(fieldNumber,player){
     return nextChoice;
 }
 
+
+
+
+//computing fields who are still possible winning fields for the respective player
+function prepareChoices(fieldNumber,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  possibleChoices = getUniqueOrDouble(possibleChoices);
+  computeEgocentricChoices(player, possibleChoices);
+}
+
+function computeEgocentricChoices(player, possibleChoices){
+  for(i=0;i<possibleChoices.length;++i){
+    var firstPossible = globals.fields[i];
+    for(j=0;j<possibleChoices.length;++j){
+      var secondPossible = possibleChoices[j];
+      manageChoices(firstPossible,secondPossible,player);
+    } 
+  }
+}
+
+function manageChoices(firstPossible,secondPossible,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+    if(secondPossible != firstPossible){
+      manageActualChoices(firstPossible,secondPossible,possibleChoices);
+    }
+}
+
+function manageActualChoices(firstPossible,secondPossible,possibleChoices){
+  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
+  var adder = parseInt(computeAdder());
+  if(adder > 0 && possibleAddedFields == adder){
+    possibleChoices = getUniqueOrDouble(possibleChoices);
+    possibleChoices.push(firstPossible, secondPossible);
+  }
+}
+
+function computeAdder(){
+  if (globals.gameRound<=3){var adderIndex=0;}
+  else {var adderIndex = Math.floor(globals.gameRound/3);}
+  var adder = 15-parseInt(globals.computerChoices[adderIndex]);
+  return adder;
+}
+
+
+
+
+//function to take an array with doubled elements and return an unique array 
+//if parameter 'doubled' is given, only the doubled elements are returned
+function getUniqueOrDouble(possibleChoices, doubled) {
+    var hash = {}, uniqueChoices = [], doubleChoices = [];
+    for ( var i = 0; i < possibleChoices.length; ++i ) {
+        if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
+            hash[ possibleChoices[i] ] = true;
+            uniqueChoices.push(possibleChoices[i]);
+        }
+        else {doubleChoices.push(possibleChoices[i]);}
+    }
+    if(doubled){return doubleChoices;}
+    else{return uniqueChoices;}
+}
+
+
+
+
+//check if win first, then check for dilemma, else find alternative move
 function findBestMove(possibleChoices,player){
   var nextChoice = searchForWin('user');
   if (nextChoice=="noSuccess"){
@@ -158,64 +249,10 @@ function findBestMove(possibleChoices,player){
   return nextChoice;
 }
 
-function computeDilemma(possibleChoices, player){
-    var possibleDilemmaMoves = findPossibleDilemma(possibleChoices, player);
-    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
-    var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
-    var nextChoice = dilemmaMoves[dilemmaIndex];
-    if (dilemmaMoves.length<=3){return nextChoice;}//maybe check if this is necessary
-    else {return undefined};
-}
 
-function findPossibleDilemma(possibleChoices, player){
-  var playerString = 'globals.' + player + 'Choices';
-  var playerChoice = eval(playerString), possibleDilemmaMoves = [];
-  for(i=0;i<possibleChoices.length;++i){
-    var first = possibleChoices[i]; 
-    for(j=i+1;j<possibleChoices.length;++j){
-    var second = possibleChoices[j];
-    var firstPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[0]);
-    var secondPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[1]);
-      if(firstPossible == 15 || secondPossible == 15){
-        possibleDilemmaMoves.push(first, second);
-      }
-    }
-  }
-  return possibleDilemmaMoves;
-}
 
-function findAlternativeChoices(player){
-  var choicesString = 'globals.' + player + 'PossibleChoices';
-  var possibleChoices = eval(choicesString);
-  if(possibleChoices.length > 0 && possibleChoices != "0"){
-    var nextChoice = getNextChoice(choicesString);
-    if(nextChoice == "stillNoAlternative"){nextChoice = getNextChoice("globals.fields");}
-  }
-  else{nextChoice = getNextChoice("globals.fields");}
-  return nextChoice;
-}
 
-function getNextChoice(array){
-  var stringArray = eval(array);
-  var nextChoice = randomChoice(stringArray);
-  if(parseInt(nextChoice)>0){return nextChoice;}
-  else{var stillNoAlternative = "stillNoAlternative";return stillNoAlternative;}
-}
-
-function prepareChoices(fieldNumber,player){
-  var choicesString = 'globals.' + player + 'PossibleChoices';
-  var possibleChoices = eval(choicesString);
-  possibleChoices = getUniqueOrDouble(possibleChoices);
-  computeEgocentricChoices(player, possibleChoices);
-}
-    
-function randomChoice(array){ 
-  var stringArray = eval(array); 
-  var possibleIndex = Math.floor(Math.random() * (stringArray.length));
-  var nextChoice = stringArray[possibleIndex];
-  return nextChoice;
- }
-
+//search for winning combination
 function searchForWin(player){
   var choicesString = 'globals.' + player + 'PossibleChoices', possibleChoices = eval(choicesString);
   var playerString = 'globals.' + player + 'Choices', playerChoices = eval(playerString);
@@ -254,53 +291,68 @@ function winInLastRounds(possibleWin,player) {
   else {return stillNoSuccess;}
 }
 
-function computeEgocentricChoices(player, possibleChoices){
-  for(i=0;i<possibleChoices.length;++i){
-    var firstPossible = globals.fields[i];
-    for(j=0;j<possibleChoices.length;++j){
-      var secondPossible = possibleChoices[j];
-      manageChoices(firstPossible,secondPossible,player);
-    } 
-  }
+
+
+//find dilemma to force win
+function computeDilemma(possibleChoices, player){
+    var possibleDilemmaMoves = findPossibleDilemma(possibleChoices, player);
+    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
+    var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
+    var nextChoice = dilemmaMoves[dilemmaIndex];
+    if (dilemmaMoves.length<=3){return nextChoice;}//maybe check if this is necessary
+    else {return undefined};
 }
 
-function manageChoices(firstPossible,secondPossible,player){
+function findPossibleDilemma(possibleChoices, player){
+  var playerString = 'globals.' + player + 'Choices';
+  var playerChoice = eval(playerString), possibleDilemmaMoves = [];
+  for(i=0;i<possibleChoices.length;++i){
+    var first = possibleChoices[i]; 
+    for(j=i+1;j<possibleChoices.length;++j){
+    var second = possibleChoices[j];
+    var firstPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[0]);
+    var secondPossible = parseInt(first) + parseInt(second) + parseInt(playerChoice[1]);
+      if(firstPossible == 15 || secondPossible == 15){
+        possibleDilemmaMoves.push(first, second);
+      }
+    }
+  }
+  return possibleDilemmaMoves;
+}
+
+
+
+
+//find alternative choices if there is no possible win and no dilemma
+function findAlternativeChoices(player){
   var choicesString = 'globals.' + player + 'PossibleChoices';
   var possibleChoices = eval(choicesString);
-    if(secondPossible != firstPossible){
-      manageActualChoices(firstPossible,secondPossible,possibleChoices);
-    }
-}
-
-function manageActualChoices(firstPossible,secondPossible,possibleChoices){
-  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-  var adder = parseInt(computeAdder());
-  if(adder > 0 && possibleAddedFields == adder){
-    possibleChoices = getUniqueOrDouble(possibleChoices);
-    possibleChoices.push(firstPossible, secondPossible);
+  if(possibleChoices.length > 0 && possibleChoices != "0"){
+    var nextChoice = getNextChoice(choicesString);
+    if(nextChoice == "stillNoAlternative"){nextChoice = getNextChoice("globals.fields");}
   }
+  else{nextChoice = getNextChoice("globals.fields");}
+  return nextChoice;
 }
 
-function computeAdder(){
-  if (globals.gameRound<=3){var adderIndex=0;}
-  else {var adderIndex = Math.floor(globals.gameRound/3);}
-  var adder = 15-parseInt(globals.computerChoices[adderIndex]);
-  return adder;
+function getNextChoice(array){
+  var stringArray = eval(array);
+  var nextChoice = randomChoice(array);
+  if(parseInt(nextChoice)>0){return nextChoice;}
+  else{var stillNoAlternative = "stillNoAlternative";return stillNoAlternative;}
 }
+    
+function randomChoice(array){ 
+  var stringArray = eval(array); 
+  var possibleIndex = Math.floor(Math.random() * (stringArray.length));
+  var nextChoice = stringArray[possibleIndex];
+  return nextChoice;
+ }
 
-function getUniqueOrDouble(possibleChoices, doubled) {
-    var hash = {}, uniqueChoices = [], doubleChoices = [];
-    for ( var i = 0; i < possibleChoices.length; ++i ) {
-        if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
-            hash[ possibleChoices[i] ] = true;
-            uniqueChoices.push(possibleChoices[i]);
-        }
-        else {doubleChoices.push(possibleChoices[i]);}
-    }
-    if(doubled){return doubleChoices;}
-    else{return uniqueChoices;}
-}
 
+
+
+//computing the results, checking if there is a winner
 function computeResult(player){
     var playerChoice = eval('globals.' + player + 'Choices');
     var playerResults = eval('globals.' + player + 'Results');
