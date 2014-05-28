@@ -1,3 +1,11 @@
+//var globals:
+//purpose: namespace which contains all global variables, to not pollute the global namespace
+//fields are all the fields which are empty in the beginning, 
+//the numbers are corresponding to the fields of a magical square (3x3), where all rows/columns/diagonals add to 15
+//gameRound is set to 0, arrays for choices and results of user and computer are set to empty
+//possibleChoices (the choices with which it is still possible to get 3 in a row/column/diagonal) 
+//are identical with fields in the begginning, but will differ from fields when playing
+
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
   gameRound : 0,
@@ -5,7 +13,8 @@ var globals = {
   userChoices : [], userResults : [], userPossibleChoices : ["2","9","4","7","5","3","6","1","8"]
 }
 
-
+//function askUser():
+//ask user to confirm if he wants to begin, if not, function for computer's next round is called
 function AskUser() {
     var askTurn = confirm("If you want to begin, please press ok");
     if (!askTurn) {
@@ -13,29 +22,98 @@ function AskUser() {
     }
 }
 
+//function manageGame(id, player, colour):
+//purpose:game engine, managing the game actions
+//first: the computer's or user's chosen image is loaded
+//second: the value(fieldNumber) of the chosen image is pushed to the respective choices array
+//third: the chosen value is deleted from fields array and possible choices arrays of user and computer
+//fourth: if gameRound is 4 or higher, results are computed
+//fifth: 1 is added to gameRound
+//sixth: function to manage playerturn is called 
 function manageGame(id, player, colour){
     var fieldNumber = id[5];
-    loadImage(id, player, colour);
+    loadImage(id, colour);
     pushValue(fieldNumber,player);
     manageDeletion(fieldNumber,player);
     if(globals.gameRound>=4){computeResult(player);}
     globals.gameRound += 1;
-    managePlayerTurn(fieldNumber,player);
+    managePlayerTurn(fieldNumber, player);
 }
 
-function loadImage(id, player, colour) {
+//function loadImage(id, colour):
+//load the image for the chosen field via changing the css background colour property of the field's id
+function loadImage(id, colour) {
     document.getElementById(id).style.background = colour;
 }
 
+//function pushValue(fieldNumber, player):
+//chosen fieldNumber is pushed to respective Choices array
+function pushValue(fieldNumber, player){
+    var playerChoice = 'globals.' + player + 'Choices';
+    eval(playerChoice).push(fieldNumber);
+}
+
+
+//function manageDeletion(fieldNumber,player):
+//calls functions to delete chosen moves from total fields and possible choices
 function manageDeletion(fieldNumber,player){
   deletePossibleChoices(fieldNumber, player);
   deleteFields(fieldNumber);
 }
 
-function managePlayerTurn(fieldNumber, player){
-    if (player == 'user'){player = 'computer';computerNextRound(fieldNumber, player);}
-    else {player = 'user';}
+//function deleteFields(fieldNumber):
+//to delete chosen field from fields array, to be sure that it is not available any more
+function deleteFields(fieldNumber){
+    var toDeleteField = globals.fields.indexOf(fieldNumber);
+    globals.fields.splice(toDeleteField,1);
 }
+
+//function deletePossibleChoices(fieldNumber):
+//prepare delete of chosen field from possibleChoices arrays, then calling
+//actualDelete to delete field from possibleChoices for both computer and user
+function deletePossibleChoices(fieldNumber){
+    var possibleForUser = globals.userPossibleChoices;
+    var possibleForComputer = globals.computerPossibleChoices;
+    actualDelete(possibleForUser, fieldNumber);
+    actualDelete(possibleForComputer, fieldNumber);
+}
+
+//function actualDelete(possibleChoices, fieldNumber):
+//loop through respective possibleChoices array of either user or computer
+//if element(checkDelete) is equal to chosen field, delete element from array
+function actualDelete(possibleChoices, fieldNumber){
+    for(i=0;i<possibleChoices.length; ++i){
+    var checkDelete = possibleChoices[i];
+      if(checkDelete == fieldNumber){
+        possibleChoices.splice(i, 1);
+      }
+    }
+}
+
+//function managePlayerTurn(fieldNumber, player)
+//purpose: to manage who's turn it is
+function managePlayerTurn(fieldNumber, player){
+    if (player == 'user'){
+      player = 'computer';
+      computerNextRound(fieldNumber, player);
+    }
+    else {
+      player = 'user';
+    }
+}
+
+
+//function computerNextRound(fieldNumber, player):
+//purpose: different strategies for computer, depending on game round
+//each is setting a variable called computerChoice whose value differs,
+//depending on the function called
+//first: findFirstComputerMove is called if gameRound is 0 or 1
+//second: findSecondComputerMove is called if gameRound is 2 or 3
+//third: balancedStrategy is called if gameRound is 4 or higher
+//the respective computerChoice is then used in a setTimeout function,
+//in order to let the computer appear more "human" and not too fast
+//this timeout function calls the manageGame function and passes in
+//the stringified computerChoice, the computer's playername and the colour
 
 function computerNextRound(fieldNumber, player) {
   if(globals.gameRound<=1){var computerChoice = findFirstComputerMove(fieldNumber);}
@@ -45,12 +123,20 @@ function computerNextRound(fieldNumber, player) {
   setTimeout(function(){manageGame(choiceString, 'computer', 'blue')}, 1000);
 }
 
+//function findFirstComputerMove(fieldNumber):
+//purpose:strategy for computer's first move
+//if he does not begin (means there already is a fieldNumber as argument) and field 5 is not free, he will 
+//choose an edgefield (by calling findPossibleEdgeField) else, he will choose the field in the middle(5)
 function findFirstComputerMove(fieldNumber){
   if(fieldNumber && fieldNumber == 5){var computerChoice = findPossibleEdgeField(globals.fields);}
   else{var computerChoice = '5';}
   return computerChoice;
 }
 
+//function findSecondComputerMove():
+//purpose:strategy for computers second move
+//if user has already two in a row/column, computer tries to prevent him from winning
+//else nonReactiveChoice is called to find the best possible move
 function findSecondComputerMove(){
   var firstUserMove = parseInt(globals.userChoices[0]), secondUserMove = parseInt(globals.userChoices[1]);
   var computerChoice = searchForWin('user');
@@ -60,9 +146,29 @@ function findSecondComputerMove(){
   return computerChoice;
 }
 
+//function findNonReactiveChoice(firstUserMove, secondUserMove):
+//purpose:find computer move depending on first two user choices
+//this function uses the fact that in the 3x3-magical square used
+//2--9--4
+//7--5--3
+//6--1--8
+//the edgefields are all divisable by 2, the others are not
+//the first two cases below are looking on the possible moves
+//if the computer's first move was 5 and the user either has
+//made already two moves on diagonal edgefields (in which case he will choose a random odd field
+//to prevent a dilemma) or just one (in which case he will go for the last free field of the diagonal,
+//which is preparing a dilemma for the user) 
+//Remember:the case of two edgefields in a row or column is already taken care of
+//in the findSecondComputerMove function
+//In all other cases the computer looks first, if there is a possiblity for the user to
+//lure the computer into a dilemma (by calling the computeDilemma function), or, if
+//there is none, find the next computer move by calling consultChoiceTree  
 function findNonReactiveChoice(firstUserMove, secondUserMove){
   if(globals.computerChoices[0] == 5 && firstUserMove%2==0 && secondUserMove%2==0){
     var computerChoice = findPossibleOddField(globals.fields);
+  }
+  else if (globals.computerChoices[0] == 5 && firstUserMove%2==0){
+    var computerChoice = 10 - firstUserMove;
   }
   else{
     var computerChoice=computeDilemma(globals.userPossibleChoices, 'user');
@@ -73,6 +179,8 @@ function findNonReactiveChoice(firstUserMove, secondUserMove){
   return computerChoice;
 }
 
+//function consultChoiceTree(firstUserMove, secondUserMove):
+//purpose: helping to find a decision for computer's second move, depending on user choices where odd fields are involved
 function consultChoiceTree(firstUserMove, secondUserMove){
   if(firstUserMove%2!=0 && secondUserMove%2!=0){
     if (firstUserMove != 5){var computerChoice = findPossibleEdgeField(globals.fields);}
@@ -80,11 +188,13 @@ function consultChoiceTree(firstUserMove, secondUserMove){
   }
   else{
     if(firstUserMove+secondUserMove%2 != 0){var computerChoice = findPossibleEdgeField(globals.fields);}
-    else {var computerChoice = findPossibleOddField(globals.fields);} //evtl statt fields possible choices
+    else {var computerChoice = findPossibleOddField(globals.fields);} //evtl possible choices instead of fields
   }
   return computerChoice;
 }
 
+//function findPossibleOddField(fields):
+//purpose: determining a free odd field by random
 function findPossibleOddField(fields){
   var fieldOkay=false;
   while (fieldOkay==false){
@@ -94,6 +204,8 @@ function findPossibleOddField(fields){
   }
 }
 
+//function findPossibleEdgeField(fields):
+//purpose: determining a free edge field by random
 function findPossibleEdgeField(fields){
   var fieldOkay=false;
   while (fieldOkay==false){
@@ -103,33 +215,13 @@ function findPossibleEdgeField(fields){
   }
 }
 
-function pushValue(fieldNumber, player){
-    var playerChoice = 'globals.' + player + 'Choices';
-    eval(playerChoice).push(fieldNumber);
-}
-
-function deleteFields(fieldNumber){
-    var toDeleteField = globals.fields.indexOf(fieldNumber);
-    globals.fields.splice(toDeleteField,1);
-}
-
-function deletePossibleChoices(fieldNumber){
-    var possibleForUser = globals.userPossibleChoices;
-    var possibleForComputer = globals.computerPossibleChoices;
-    actualDelete(possibleForUser, fieldNumber);
-    actualDelete(possibleForComputer, fieldNumber);
-}
 
 
-function actualDelete(possibleChoices, fieldNumber){
-    for(i=0;i<possibleChoices.length; ++i){
-    var checkDelete = possibleChoices[i];
-      if(checkDelete == fieldNumber){
-        possibleChoices.splice(i, 1);
-      }
-    }
-}
-
+//function balancedStrategy(fieldNumber,player):
+//purpose: strategy for last two computer moves
+//after preparing the possible choices for respective player
+//it is searched for a possible win of the player
+//if there is none, findBestMove is called
 function balancedStrategy(fieldNumber,player){
     var choicesString = 'globals.' + player + 'PossibleChoices';
     var possibleChoices = eval(choicesString);
@@ -141,6 +233,95 @@ function balancedStrategy(fieldNumber,player){
     return nextChoice;
 }
 
+
+
+//function prepareChoices(fieldNumber,player):
+//purpose: computing fields who are still possible winning fields for the respective player
+//this is done by calling computeEgocentricChoices
+function prepareChoices(fieldNumber,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  //possibleChoices = getUniqueOrDouble(possibleChoices);
+  computeEgocentricChoices(player, possibleChoices);
+}
+
+//function computeEgocentricChoices(player, possibleChoices):
+//contains nested for loop to prepare parameters for manageChoices function which is called from the inner loop
+function computeEgocentricChoices(player, possibleChoices){
+  for(i=0;i<possibleChoices.length;++i){
+    var firstPossible = globals.fields[i];
+    for(j=0;j<possibleChoices.length;++j){
+      var secondPossible = possibleChoices[j];
+      manageChoices(firstPossible,secondPossible,player);
+    } 
+  }
+}
+
+//function manageChoices(firstPossible,secondPossible,player):
+//contains an if statement to check if the two first parameters are equal, if not,
+//it calls the manageActualChoices function
+function manageChoices(firstPossible,secondPossible,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+    if(secondPossible != firstPossible){
+      manageActualChoices(firstPossible,secondPossible,possibleChoices);
+    }
+}
+
+//function manageActualChoices(firstPossible,secondPossible,possibleChoices):
+//purpose: decide if firstPossible/secondPossible can be pushed to possible choices
+//first, a variable possibleAddedFields is set. second, the adder is computed. What is the adder?
+//the adder is a sum of two numbers, corresponding to fields which are still possible winning fields
+//(based on the choices already made, see computeAdder function)
+//If the computed adder and the possibleAddedFields-variable are equal, the two parameters 
+//firstPossible and secondPossible are pushed into the respective possibleChoices array (of either computer or user) 
+function manageActualChoices(firstPossible,secondPossible,possibleChoices){
+  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
+  var adder = parseInt(computeAdder());
+  if(adder > 0 && possibleAddedFields == adder){
+    possibleChoices = getUniqueOrDouble(possibleChoices);
+    possibleChoices.push(firstPossible, secondPossible);
+  }
+}
+
+//function computeAdder():
+//purpose: to compute adder depending on gameRound
+//in first rounds, adderIndex is 0, so the first element from computerChoices is taken to compute Adder
+//in subsequent rounds, adderIndex increases, so the next elements in computerChoices are used
+//because the possibleChoices which were computed based on the first element are still in the respective
+//possibleChoices-array (if not already chosen as next move), there is no problem in computing the adder anew in each round 
+function computeAdder(){
+  if (globals.gameRound<=3){var adderIndex=0;}
+  else {var adderIndex = Math.floor(globals.gameRound/3);}
+  var adder = 15-parseInt(globals.computerChoices[adderIndex]);
+  return adder;
+}
+
+
+
+//function getUniqueOrDouble(possibleChoices, doubled):
+//function to take an array with doubled elements and return an unique array 
+//if parameter 'doubled' is given, only the doubled elements are returned
+//which is needed in dilemma computation
+function getUniqueOrDouble(possibleChoices, doubled) {
+    var hash = {}, uniqueChoices = [], doubleChoices = [];
+    for ( var i = 0; i < possibleChoices.length; ++i ) {
+        if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
+            hash[ possibleChoices[i] ] = true;
+            uniqueChoices.push(possibleChoices[i]);
+        }
+        else {doubleChoices.push(possibleChoices[i]);}
+    }
+    if(doubled){return doubleChoices;}
+    else{return uniqueChoices;}
+}
+
+
+
+//function findBestMove(possibleChoices,player)
+//purpose: contains the continued main algorithm for rounds 4 and higher
+//after check if computer wins in function balanced strategy is negative, it is called
+//it first checks if user can win, then checks for dilemmata for computer and user, and then finds alternative move
 function findBestMove(possibleChoices,player){
   var nextChoice = searchForWin('user');
   if (nextChoice=="noSuccess"){
@@ -155,15 +336,76 @@ function findBestMove(possibleChoices,player){
   return nextChoice;
 }
 
+
+
+//function searchForWin(player):
+//purpose: search for winning combinations by calling getWinningMove, but only if possibleChoices are more than 0
+function searchForWin(player){
+  var choicesString = 'globals.' + player + 'PossibleChoices', possibleChoices = eval(choicesString);
+  var playerString = 'globals.' + player + 'Choices', playerChoices = eval(playerString);
+  var noSuccess = "noSuccess";
+  if(possibleChoices.length>0){
+    nextChoice = getWinningMove(possibleChoices, player, noSuccess, playerChoices);
+    if(nextChoice){return nextChoice;}
+    else{return noSuccess;}
+  }
+  else{return noSuccess;}
+}
+
+//function getWinningMove(possibleChoices, player, noSuccess, playerChoices):
+//purpose: find winning move, if gameRound is 5 or higher, call winInLastRounds
+function getWinningMove(possibleChoices, player, noSuccess, playerChoices){
+  for(i=0;i<possibleChoices.length;++i){
+    var possibleWin = parseInt(possibleChoices[i]);
+    if(globals.gameRound>=5){var nextChoice = winInLastRounds(possibleWin,player);if (nextChoice == possibleWin){break;}}
+    else{
+      var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
+      if(possibleWin + addedChoices == 15){var nextChoice = possibleWin;break;}
+      else{var nextChoice = noSuccess;}
+    }
+  }
+  return nextChoice;
+}
+
+//function winInLastRounds(possibleWin,player):
+//loops through array playerResults which contains all possible sums by adding two elements of the first three moves
+//if possibleWin-move and the respective elements of playerResults add to 15, the winning combination is returned
+function winInLastRounds(possibleWin,player) {
+  var playerResults = eval('globals.' + player + 'Results');
+  for(j=0;j<playerResults.length;++j){
+    var addedChoices = parseInt(playerResults[j]); 
+    if(possibleWin + addedChoices == 15){
+      var nextChoice = possibleWin;break;
+    }
+  }
+  var stillNoSuccess = "noSuccess";
+  if(nextChoice==possibleWin){return nextChoice;} 
+  else {return stillNoSuccess;}
+}
+
+
+//function computeDilemma(possibleChoices, player):
+//purpose: find dilemma to force win
+//first call findPossibleDilemma, get an array in return which contains doubled elements
+//(these doubled elements are the possible dilemma moves)
+//then call getUniqueOrDoubled with parameter doubled to get only the doubled elements returned
+//then choose by random one of the dilemmaMoves and return it
 function computeDilemma(possibleChoices, player){
     var possibleDilemmaMoves = findPossibleDilemma(possibleChoices, player);
-    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);//trying alternative getUniqueOrDouble
+    var dilemmaMoves = getUniqueOrDouble(possibleDilemmaMoves, doubled=1);
     var dilemmaIndex = Math.floor(Math.random() * (dilemmaMoves.length));
     var nextChoice = dilemmaMoves[dilemmaIndex];
     if (dilemmaMoves.length<=3){return nextChoice;}//maybe check if this is necessary
     else {return undefined};
 }
 
+//function findPossibleDilemma(possibleChoices, player):
+//purpose: computes possibleDilemmaMoves
+//nested loop to go through possible choices, with variables first and second representing respective elements
+//variables firstPossible/secondPossible are sums of the variables from the nested loop and the first and second
+//choice of the respective player (because dilemmata can only be established in gameRound 4 or 5, it is not sensible
+//to compute them in later rounds based on third or fourth choice)
+//if either firstPossible or secondPossible (or both) add up to 15, push them to possibleDilemmaMoves-array
 function findPossibleDilemma(possibleChoices, player){
   var playerString = 'globals.' + player + 'Choices';
   var playerChoice = eval(playerString), possibleDilemmaMoves = [];
@@ -181,6 +423,13 @@ function findPossibleDilemma(possibleChoices, player){
   return possibleDilemmaMoves;
 }
 
+
+
+//function findAlternativeChoices(player):
+//purpose: find alternative choices if there is no possible win and no dilemma
+//first, try to find alternative choice by a random field from possibleChoices
+//if this does not work, try to find alternative choice by a random field from all remaining fields
+
 function findAlternativeChoices(player){
   var choicesString = 'globals.' + player + 'PossibleChoices';
   var possibleChoices = eval(choicesString);
@@ -192,20 +441,17 @@ function findAlternativeChoices(player){
   return nextChoice;
 }
 
+//function getNextChoice(array):
+//purpose: call random choice on array-parameter 
 function getNextChoice(array){
   var stringArray = eval(array);
-  var nextChoice = randomChoice(stringArray);
+  var nextChoice = randomChoice(array);
   if(parseInt(nextChoice)>0){return nextChoice;}
   else{var stillNoAlternative = "stillNoAlternative";return stillNoAlternative;}
 }
 
-function prepareChoices(fieldNumber,player){
-  var choicesString = 'globals.' + player + 'PossibleChoices';
-  var possibleChoices = eval(choicesString);
-  possibleChoices = getUniqueOrDouble(possibleChoices);
-  computeEgocentricChoices(player, possibleChoices);
-}
-    
+//function randomChoice(array)
+//purpose: determine nextChoice by random operation on array-parameter    
 function randomChoice(array){ 
   var stringArray = eval(array); 
   var possibleIndex = Math.floor(Math.random() * (stringArray.length));
@@ -213,91 +459,10 @@ function randomChoice(array){
   return nextChoice;
  }
 
-function searchForWin(player){
-  var choicesString = 'globals.' + player + 'PossibleChoices', possibleChoices = eval(choicesString);
-  var playerString = 'globals.' + player + 'Choices', playerChoices = eval(playerString);
-  var noSuccess = "noSuccess";
-  if(possibleChoices.length>0){
-    nextChoice = getWinningMove(possibleChoices, player, noSuccess, playerChoices);
-    if(nextChoice){return nextChoice;}
-    else{return noSuccess;}
-  }
-  else{return noSuccess;}
-}
 
-function getWinningMove(possibleChoices, player, noSuccess, playerChoices){
-  for(i=0;i<possibleChoices.length;++i){
-    var possibleWin = parseInt(possibleChoices[i]);
-    if(globals.gameRound>=5){var nextChoice = winInLastRounds(possibleWin,player);if (nextChoice == possibleWin){break;}}
-    else{
-      var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
-      if(possibleWin + addedChoices == 15){var nextChoice = possibleWin;break;}
-      else{var nextChoice = noSuccess;}
-    }
-  }
-  return nextChoice;
-}
 
-function winInLastRounds(possibleWin,player) {
-  var playerResults = eval('globals.' + player + 'Results');
-  for(j=0;j<playerResults.length;++j){
-    var addedChoices = parseInt(playerResults[j]); 
-    if(possibleWin + addedChoices == 15){
-      var nextChoice = possibleWin;break;
-    }
-  }
-  var stillNoSuccess = "noSuccess";
-  if(nextChoice==possibleWin){return nextChoice;} 
-  else {return stillNoSuccess;}
-}
-
-function computeEgocentricChoices(player, possibleChoices){
-  for(i=0;i<possibleChoices.length;++i){
-    var firstPossible = globals.fields[i];
-    for(j=0;j<possibleChoices.length;++j){
-      var secondPossible = possibleChoices[j];
-      manageChoices(firstPossible,secondPossible,player);
-    } 
-  }
-}
-
-function manageChoices(firstPossible,secondPossible,player){
-  var choicesString = 'globals.' + player + 'PossibleChoices';
-  var possibleChoices = eval(choicesString);
-    if(secondPossible != firstPossible){
-      manageActualChoices(firstPossible,secondPossible,possibleChoices);
-    }
-}
-
-function manageActualChoices(firstPossible,secondPossible,possibleChoices){
-  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-  var adder = parseInt(computeAdder());
-  if(adder > 0 && possibleAddedFields == adder){
-    possibleChoices = getUniqueOrDouble(possibleChoices);
-    possibleChoices.push(firstPossible, secondPossible);
-  }
-}
-
-function computeAdder(){
-  if (globals.gameRound<=3){var adderIndex=0;}
-  else {var adderIndex = Math.floor(globals.gameRound/3);}
-  var adder = 15-parseInt(globals.computerChoices[adderIndex]);
-  return adder;
-}
-
-function getUniqueOrDouble(possibleChoices, doubled) {
-    var hash = {}, uniqueChoices = [], doubleChoices = [];
-    for ( var i = 0; i < possibleChoices.length; ++i ) {
-        if ( !hash.hasOwnProperty(possibleChoices[i]) ) { 
-            hash[ possibleChoices[i] ] = true;
-            uniqueChoices.push(possibleChoices[i]);
-        }
-        else {doubleChoices.push(possibleChoices[i]);}
-    }
-    if(doubled){return doubleChoices;}
-    else{return uniqueChoices;}
-}
-
+//function computeResult(player):
+//purpose: computing the results, checking if there is a winner
 function computeResult(player){
     var playerChoice = eval('globals.' + player + 'Choices');
     var playerResults = eval('globals.' + player + 'Results');
@@ -311,6 +476,9 @@ function computeResult(player){
     }
 }
 
+//function addFirstResults(playerChoice,playerResults):
+//interim function to add the first choices and push them into respective results array
+//the results array is also used by winInLastRounds function
 function addFirstResults(playerChoice,playerResults) {
     for(i=0;i<playerChoice.length;++i){
       var first = playerChoice[i];
@@ -322,6 +490,8 @@ function addFirstResults(playerChoice,playerResults) {
     }
 }
 
+//function computeEndResult(playerChoice, playerResults, player):
+//purpose: function to get result in last two rounds
 function computeEndResult(playerChoice, playerResults, player) {
     for(i=0;i<playerResults.length;++i){
       var oldResult = playerResults[i];
@@ -333,6 +503,8 @@ function computeEndResult(playerChoice, playerResults, player) {
     }
 }
 
+//function checkForTie(newResult):
+//purpose: check if there is no winner, give a respective alert and call the backToStart function
 function checkForTie(newResult){
     if(newResult != 15){
       alert("No winner!");
@@ -340,11 +512,15 @@ function checkForTie(newResult){
     }
 }
 
+//function wins(player):
+//purpose: give an alert, call the backToStart function
 function wins(player){
     alert("The " + player + " wins!");
     backToStart(); 
 }
 
+//function backToStart()
+//purpose: relocate to startsite after the game is over
 function backToStart() {
     location.href = "start.html";
 }
