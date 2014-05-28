@@ -1,10 +1,12 @@
-var fields = ["2","9","4","7","5","3","6","1","8"];
-var gameRound = 0;
-var computerChoices = [], computerResults = [];
-var userChoices = []; userResults = [];
-var playerTurn = " ";
+//namespace which contains all global variables, to not pollute the global namespace
+var globals = { 
+  fields : ["2","9","4","7","5","3","6","1","8"],
+  gameRound : 0,
+  computerChoices : [], computerResults : [],
+  userChoices : [], userResults : [] 
+}
 
-
+//prompt to ask user if he wants to begin
 function AskUser() {
     var askTurn = confirm("If you want to begin, please press ok");
     if (!askTurn) {
@@ -12,49 +14,67 @@ function AskUser() {
     }
 }
 
-function loadImage(id, player, colour) {
-    document.getElementById(id).style.background = colour;
+//function for game engine
+function manageGame(id, player, colour){
     var fieldNumber = id[5];
-    pushValue(player, fieldNumber);
-    deletePushedValue(fieldNumber);
-    gameRound += 1;
-    if(gameRound>=5){computeResult(player)};
+    loadImage(id, colour);
+    pushValue(fieldNumber,player);
+    manageDeletion(fieldNumber);
+    if(globals.gameRound>=4){computeResult(player);}
+    globals.gameRound += 1;
     managePlayerTurn(player);
 }
 
+//loading image
+function loadImage(id, colour) {
+    document.getElementById(id).style.background = colour;
+}
+
+function pushValue(fieldNumber, player){
+    var playerChoice = 'globals.' + player + 'Choices';
+    eval(playerChoice).push(fieldNumber);
+}
+
+//functions to delete chosen move from total fields 
+//fields are all remaining empty fields
+function manageDeletion(fieldNumber){
+  deleteFields(fieldNumber);
+}
+
+function deleteFields(fieldNumber){
+    var toDeleteField = globals.fields.indexOf(fieldNumber);
+    globals.fields.splice(toDeleteField,1);
+}
+
+
+//to manage who's turn it is
 function managePlayerTurn(player){
     if (player == 'user'){
+      player = 'computer';
       computerNextRound();
-      playerTurn = 'computer';
     }
     else {
-      playerTurn = 'user';
+      player = 'user';
     }
 }
 
 function computerNextRound() {
+    alert("computing...");
+    var fields = globals.fields;
     var choiceIndex = Math.floor(Math.random() * (fields.length));
     var computerChoice = fields[choiceIndex];
     var choiceString = 'field' + computerChoice; 
-    setTimeout(function(){loadImage(choiceString, 'computer', 'blue')}, 1000); 
+    setTimeout(function(){manageGame(choiceString, 'computer', 'blue')}, 1000); 
 }
 
-function pushValue(player, fieldNumber){
-    var playerChoice = eval(player + 'Choices');
-    playerChoice.push(fieldNumber);
-}
 
-function deletePushedValue(fieldNumber){
-    var toDelete = fields.indexOf(fieldNumber);
-    fields.splice(toDelete,1); 
-}
-
+//computing the results, checking if there is a winner
 function computeResult(player){
-    var playerChoice = eval(player + 'Choices');
-    var playerResults = eval(player + 'Results');
-    if(gameRound==5 || gameRound==6){
+    var playerChoice = eval('globals.' + player + 'Choices');
+    var playerResults = eval('globals.' + player + 'Results');
+    if(globals.gameRound==4 || globals.gameRound==5){
       var result = parseInt(playerChoice[0])+parseInt(playerChoice[1])+parseInt(playerChoice[2]);
-      if(result == 15){won(player);}
+      if(result == 15){wins(player);}
       else{ addFirstResults(playerChoice, playerResults);}
     } 
     else {
@@ -77,9 +97,9 @@ function computeEndResult(playerChoice, playerResults, player) {
     for(i=0;i<playerResults.length;++i){
       var oldResult = playerResults[i];
       var newResult = parseInt(oldResult) + parseInt(playerChoice[3]);
-      if (newResult == 15){won(player);}
+      if (newResult == 15){wins(player);}
     }
-    if(gameRound == 8){
+    if(globals.gameRound == 7){
       checkForTie(newResult);
     }
 }
@@ -91,8 +111,8 @@ function checkForTie(newResult){
     }
 }
 
-function won(player){
-    alert("The " + player + " has won!");
+function wins(player){
+    alert("The " + player + " wins!");
     backToStart(); 
 }
 
@@ -102,4 +122,15 @@ function backToStart() {
 
 
 //var winningNumbers = ["1","5","9","1","6","8","2","4","9","2","5","8","2","6","7","3","4","8","3","5","7","4","5","6"];
+/* wenn 1: 5,6,8,9
+   wenn 2: 4,5,6,7,8,9
+   wenn 3: 4,5,7,8
 
+   wenn 4: 2,3,5,6,8,9
+   wenn 5: 1,2,3,4,6,7,8,9
+   wenn 6: 1,2,4,5,7,8
+
+   wenn 7: 2,3,5,6
+   wenn 8: 1,2,3,4,5,6
+   wenn 9: 1,2,4,5
+*/

@@ -3,47 +3,47 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-<head>
-    <title>TicTacToe</title>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
-    <script type="text/javascript" src="js/chaotic.js"></script>
-</head>
-<body onload="AskUser();">
- <table>
-<tr>
-    <td onclick="loadImage('field2', 'user', 'red');" >
-      <div id="field2"></div>
-    </td>
-    <td onclick="loadImage('field9', 'user', 'red');" >
-      <div id="field9"></div>
-    </td>
-    <td onclick="loadImage('field4', 'user', 'red');" >
-      <div id="field4"></div>
-    </td>
-</tr>
-<tr>
-    <td onclick="loadImage('field7', 'user', 'red');" >
-      <div id="field7"></div>
-    </td>
-    <td onclick="loadImage('field5', 'user', 'red');" >
-      <div id="field5"></div>
-    </td>
-    <td onclick="loadImage('field3', 'user', 'red');" >
-      <div id="field3"></div>
-    </td>
-</tr>
-<tr>
-    <td onclick="loadImage('field6', 'user', 'red');" >
-      <div id="field6"></div>
-    </td>
-    <td onclick="loadImage('field1', 'user', 'red');" >
-      <div id="field1"></div>
-    </td>
-    <td onclick="loadImage('field8', 'user', 'red');" >
-      <div id="field8"></div>
-    </td>
-</tr>
-</table>   
-</body>
+  <head>
+      <title>TicTacToe</title>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
+      <script type="text/javascript" src="js/chaotic.js"></script>
+  </head>
+  <body onload="AskUser();">
+    <table>
+      <tr>
+          <td onclick="manageGame('field2', 'user', 'red');" >
+            <div id="field2">2</div>
+          </td>
+          <td onclick="manageGame('field9', 'user', 'red');" >
+            <div id="field9">9</div>
+          </td>
+          <td onclick="manageGame('field4', 'user', 'red');" >
+            <div id="field4">4</div>
+          </td>
+      </tr>
+      <tr>
+          <td onclick="manageGame('field7', 'user', 'red');" >
+            <div id="field7">7</div>
+          </td>
+          <td onclick="manageGame('field5', 'user', 'red');" >
+            <div id="field5">5</div>
+          </td>
+          <td onclick="manageGame('field3', 'user', 'red');" >
+            <div id="field3">3</div>
+          </td>
+      </tr>
+      <tr>
+          <td onclick="manageGame('field6', 'user', 'red');" >
+            <div id="field6">6</div>
+          </td>
+          <td onclick="manageGame('field1', 'user', 'red');" >
+            <div id="field1">1</div>
+          </td>
+          <td onclick="manageGame('field8', 'user', 'red');" >
+            <div id="field8">8</div>
+          </td>
+      </tr>
+    </table>  
+  </body>
 </html>
