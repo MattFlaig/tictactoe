@@ -23,7 +23,7 @@ function AskUser() {
 }
 
 //function manageGame(id, player, colour):
-//purpose:kind of game engine, managing the game actions
+//purpose:game engine, managing the game actions
 //first: the computer's or user's chosen image is loaded
 //second: the value(fieldNumber) of the chosen image is pushed to the respective choices array
 //third: the chosen value is deleted from fields array and possible choices arrays of user and computer
@@ -116,7 +116,6 @@ function managePlayerTurn(fieldNumber, player){
 //the stringified computerChoice, the computer's playername and the colour
 
 function computerNextRound(fieldNumber, player) {
-  
   if(globals.gameRound<=1){var computerChoice = findFirstComputerMove(fieldNumber);}
   else if(globals.gameRound==2 || globals.gameRound==3){var computerChoice = findSecondComputerMove();}
   else {var computerChoice = balancedStrategy(fieldNumber,player);}
