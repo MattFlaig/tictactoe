@@ -151,8 +151,8 @@ function checkForTie(newResult){
 }
 
 function wins(player){
-     document.getElementById("ending").innerHTML = "The " + player + " wins!";
-    alert();
+     document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
+     document.getElementById("ending").innerHTML = "The " + player + " wins! Wanna play once more?";
 }
 
 function backToMenu() {

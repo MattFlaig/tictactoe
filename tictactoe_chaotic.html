@@ -16,27 +16,30 @@
   <body class="chaotic">
     
     <div class="center hero-unit">
+      
+      
+      
     <h2>Let's play TicTacToe!</h2>
     <h4>Computer playing style: chaotic</h4>
-       <div id="ending">
-      </div>
+       
       </br>
       <div class="btn-group"> 
         
-          <button class="btn" onclick="whoBegins('user');">
+          <button class="btn ingroup" onclick="whoBegins('user');">
           User begins
           </button>
-          <button class="btn" onclick="whoBegins('computer');">
+          <button class="btn ingroup" onclick="whoBegins('computer');">
           Computer begins
           </button>
-          <button class="btn" onclick="backToMenu();">
+          <button class="btn ingroup" onclick="backToMenu();">
           Back to menu
           </button>
-          <button class="btn" onclick="restartGame();">
+          <button class="btn ingroup" onclick="restartGame();">
           Restart
           </button>
           
-      </div></br>
+      </div>
+      
       <table>
         <tr>
             <td id="handler2">
@@ -63,7 +66,8 @@
             </td>
         </tr>
       </table>
-      
+      <div id="message">
+      </div>
     </div> 
   </body>
 </html>
