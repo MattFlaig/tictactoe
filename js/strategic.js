@@ -23,7 +23,8 @@ function AskUser() {
 }
 
 //function manageGame(id, player, colour):
-//purpose:game engine, managing the game actions
+//purpose:game engine, managing the game actions, taking input from onclick-function in template 
+//(for user moves) and from computerNextRound-function (for computer moves)
 //first: the computer's or user's chosen image is loaded
 //second: the value(fieldNumber) of the chosen image is pushed to the respective choices array
 //third: the chosen value is deleted from fields array and possible choices arrays of user and computer
@@ -42,6 +43,7 @@ function manageGame(id, player, colour){
 
 //function loadImage(id, colour):
 //load the image for the chosen field via changing the css background colour property of the field's id
+//(the div is already a white circle on white background, to make it visible we only change the colour)
 function loadImage(id, colour) {
     document.getElementById(id).style.background = colour;
 }
@@ -120,7 +122,7 @@ function computerNextRound(fieldNumber, player) {
   else if(globals.gameRound==2 || globals.gameRound==3){var computerChoice = findSecondComputerMove();}
   else {var computerChoice = balancedStrategy(fieldNumber,player);}
   var choiceString = 'field' + computerChoice; 
-  setTimeout(function(){manageGame(choiceString, 'computer', 'blue')}, 1000);
+  setTimeout(function(){manageGame(choiceString, 'computer', 'teal')}, 1000);
 }
 
 //function findFirstComputerMove(fieldNumber):
@@ -136,7 +138,7 @@ function findFirstComputerMove(fieldNumber){
 //function findSecondComputerMove():
 //purpose:strategy for computers second move
 //if user has already two in a row/column, computer tries to prevent him from winning
-//else nonReactiveChoice is called to find the best possible move
+//else findNonReactiveChoice is called to find the best possible move
 function findSecondComputerMove(){
   var firstUserMove = parseInt(globals.userChoices[0]), secondUserMove = parseInt(globals.userChoices[1]);
   var computerChoice = searchForWin('user');
@@ -300,7 +302,7 @@ function computeAdder(){
 
 
 //function getUniqueOrDouble(possibleChoices, doubled):
-//function to take an array with doubled elements and return an unique array 
+//purpose: function to take an array with doubled elements and return an unique array 
 //if parameter 'doubled' is given, only the doubled elements are returned
 //which is needed in dilemma computation
 function getUniqueOrDouble(possibleChoices, doubled) {
@@ -401,7 +403,7 @@ function computeDilemma(possibleChoices, player){
 
 //function findPossibleDilemma(possibleChoices, player):
 //purpose: computes possibleDilemmaMoves
-//nested loop to go through possible choices, with variables first and second representing respective elements
+//nested loop to go two times through possible choices, with variables first and second representing respective elements
 //variables firstPossible/secondPossible are sums of the variables from the nested loop and the first and second
 //choice of the respective player (because dilemmata can only be established in gameRound 4 or 5, it is not sensible
 //to compute them in later rounds based on third or fourth choice)

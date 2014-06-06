@@ -7,43 +7,52 @@
       <title>TicTacToe</title>
       <meta http-equiv="content-type" content="text/html; charset=utf-8" />
       <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
+      
+      <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
       <script type="text/javascript" src="js/egocentric.js"></script>
+      <script src="http://code.jquery.com/jquery.js"></script>
+      <script src="bootstrap/js/bootstrap.min.js"></script>
+      
   </head>
-  <body onload="AskUser();">
+  <body class="egocentric" onload="AskUser();">
+    <div class="center hero-unit">
+    <h2>Let's play TicTacToe!</h2>
+    <h4>Computer playing style: egocentric</h4>
     <table>
       <tr>
-          <td onclick="manageGame('field2', 'user', 'red');" >
-            <div id="field2">2</div>
+          <td onclick="manageGame('field2', 'user', 'black');" >
+            <div id="field2"></div>
           </td>
-          <td onclick="manageGame('field9', 'user', 'red');" >
-            <div id="field9">9</div>
+          <td onclick="manageGame('field9', 'user', 'black');" >
+            <div id="field9"></div>
           </td>
-          <td onclick="manageGame('field4', 'user', 'red');" >
-            <div id="field4">4</div>
-          </td>
-      </tr>
-      <tr>
-          <td onclick="manageGame('field7', 'user', 'red');" >
-            <div id="field7">7</div>
-          </td>
-          <td onclick="manageGame('field5', 'user', 'red');" >
-            <div id="field5">5</div>
-          </td>
-          <td onclick="manageGame('field3', 'user', 'red');" >
-            <div id="field3">3</div>
+          <td onclick="manageGame('field4', 'user', 'black');" >
+            <div id="field4"></div>
           </td>
       </tr>
       <tr>
-          <td onclick="manageGame('field6', 'user', 'red');" >
-            <div id="field6">6</div>
+          <td onclick="manageGame('field7', 'user', 'black');" >
+            <div id="field7"></div>
           </td>
-          <td onclick="manageGame('field1', 'user', 'red');" >
-            <div id="field1">1</div>
+          <td onclick="manageGame('field5', 'user', 'black');" >
+            <div id="field5"></div>
           </td>
-          <td onclick="manageGame('field8', 'user', 'red');" >
-            <div id="field8">8</div>
+          <td onclick="manageGame('field3', 'user', 'black');" >
+            <div id="field3"></div>
+          </td>
+      </tr>
+      <tr>
+          <td onclick="manageGame('field6', 'user', 'black');" >
+            <div id="field6"></div>
+          </td>
+          <td onclick="manageGame('field1', 'user', 'black');" >
+            <div id="field1"></div>
+          </td>
+          <td onclick="manageGame('field8', 'user', 'black');" >
+            <div id="field8"></div>
           </td>
       </tr>
     </table>  
+    </div>
   </body>
 </html>
