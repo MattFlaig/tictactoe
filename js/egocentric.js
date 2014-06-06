@@ -83,7 +83,7 @@ function computerNextRound(fieldNumber) {
     var computerChoice = egocentricStrategy(fieldNumber);
   }
   var choiceString = 'field' + computerChoice; 
-  setTimeout(function(){manageGame(choiceString, 'computer', 'blue')}, 1000);
+  setTimeout(function(){manageGame(choiceString, 'computer', 'orange')}, 1000);
 }
 
 
@@ -172,7 +172,7 @@ function winInLastRounds(possibleWin) {
 }
 
 function computeEgocentricChoices(){
-alert("before compute: " + globals.computerPossibleChoices);
+//alert("before compute: " + globals.computerPossibleChoices);
   for(i=0;i<globals.fields.length;++i){
     var firstPossible = globals.fields[i];
     for(j=0;j<globals.fields.length;++j){
