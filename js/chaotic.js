@@ -1,7 +1,7 @@
 //namespace which contains all global variables, to not pollute the global namespace
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
-  gameRound : 0,
+  gameRound : 0, ending: false,
   computerChoices : [], computerResults : [],
   userChoices : [], userResults : [], 
   playerTurn : " "
@@ -9,6 +9,7 @@ var globals = {
 
 //prompt to ask user if he wants to begin
 function whoBegins(player) {
+  if(globals.gameRound==0){
     if (player == "computer") {
         globals.playerTurn = "computer";
         prepareFields();
@@ -18,6 +19,10 @@ function whoBegins(player) {
         globals.playerTurn = "user";
         prepareFields();
     }
+  }
+  else{
+    disableFields();
+  }
 }
 
 //function for game engine
@@ -56,7 +61,7 @@ function deleteFields(fieldNumber){
 //to manage who's turn it is
 function managePlayerTurn(player){
     if (player == 'user'){
-      if(globals.gameRound < 8){
+      if(globals.ending == false){
         globals.playerTurn = 'computer';
         player = 'computer';
         disableFields();
@@ -137,7 +142,8 @@ function computeEndResult(playerChoice, playerResults, player) {
     for(i=0;i<playerResults.length;++i){
       var oldResult = playerResults[i];
       var newResult = parseInt(oldResult) + parseInt(playerChoice[3]);
-      if (newResult == 15){wins(player);}
+      alert(newResult);
+      if (newResult == 15){wins(player); break;}
     }
     if(globals.gameRound == 7){
       checkForTie(newResult);
@@ -146,13 +152,21 @@ function computeEndResult(playerChoice, playerResults, player) {
 
 function checkForTie(newResult){
     if(newResult != 15){
+      globals.ending = true;
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
       document.getElementById("ending").innerHTML = "No Winner!" ;
     }
 }
 
 function wins(player){
-     document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
-     document.getElementById("ending").innerHTML = "The " + player + " wins! Wanna play once more?";
+  globals.ending = true;
+  if(player=='user'){
+     document.getElementById("message").innerHTML ="<div class=" + "'alert alert-success'" +  "id='ending'></div>";
+  }
+  else{
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-error'" +  "id='ending'></div>";
+  }
+     document.getElementById("ending").innerHTML = "The " + player + " wins!";
 }
 
 function backToMenu() {

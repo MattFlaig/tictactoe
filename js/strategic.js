@@ -8,18 +8,30 @@
 
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
-  gameRound : 0,
+  gameRound : 0, ending: false,
   computerChoices : [], computerResults : [], computerPossibleChoices : ["2","9","4","7","5","3","6","1","8"],
-  userChoices : [], userResults : [], userPossibleChoices : ["2","9","4","7","5","3","6","1","8"]
+  userChoices : [], userResults : [], userPossibleChoices : ["2","9","4","7","5","3","6","1","8"],
+  playerTurn : " "
 }
 
-//function askUser():
-//ask user to confirm if he wants to begin, if not, function for computer's next round is called
-function AskUser() {
-    var askTurn = confirm("If you want to begin, please press ok");
-    if (!askTurn) {
+//function WhoBegins():
+//depending on which button was pressed, fields are prepared and if 'computer' is sent as parameter, computerNextRound() is called
+//when buttons are pushed during the game, the fields are disabled to prevent messing around
+function whoBegins(player) {
+  if(globals.gameRound==0){
+    if (player == "computer") {
+        globals.playerTurn = "computer";
+        prepareFields();
         computerNextRound();
     }
+    else{
+        globals.playerTurn = "user";
+        prepareFields();
+    }
+  }
+  else{
+    disableFields();
+  }
 }
 
 //function manageGame(id, player, colour):
@@ -93,15 +105,46 @@ function actualDelete(possibleChoices, fieldNumber){
 }
 
 //function managePlayerTurn(fieldNumber, player)
-//purpose: to manage who's turn it is
+//purpose: to manage who's turn it is and prepare/disable fields during the game
 function managePlayerTurn(fieldNumber, player){
     if (player == 'user'){
-      player = 'computer';
-      computerNextRound(fieldNumber, player);
+      if(globals.ending == false){
+        globals.playerTurn = 'computer';
+        player = 'computer';
+        disableFields();
+        computerNextRound(fieldNumber, player);
+      }
+      else{
+        disableFields();
+      }
     }
     else {
       player = 'user';
+      globals.playerTurn = 'user';
+      prepareFields();
     }
+}
+
+function disableFields(){
+  for(var i=0;i<9; ++i){
+    var fieldString = 'field' + (i+1);
+    document.getElementById(fieldString).onclick = "event.cancelBubble = true;";
+  }
+}
+
+function prepareFields(){
+  //hideButtons();
+  for(i=0;i<globals.fields.length;++i){
+    var field = globals.fields[i];
+    var stringHandler = 'handler' + field, stringField = 'field' + field;
+    if(globals.playerTurn == 'computer'){
+      document.getElementById(stringHandler).innerHTML = "<div id= " + "'" + stringField + "'" + "></div>";
+    } 
+    else{
+      document.getElementById(stringHandler).innerHTML = "<div id= '" + stringField + "' onclick =\"manageGame(" +
+                                                         "'field" + field + "','user', 'black');\"></div>";
+    }
+  }
 }
 
 
@@ -120,7 +163,7 @@ function managePlayerTurn(fieldNumber, player){
 function computerNextRound(fieldNumber, player) {
   if(globals.gameRound<=1){var computerChoice = findFirstComputerMove(fieldNumber);}
   else if(globals.gameRound==2 || globals.gameRound==3){var computerChoice = findSecondComputerMove();}
-  else {var computerChoice = balancedStrategy(fieldNumber,player);}
+  else {var computerChoice = balancedStrategy(fieldNumber, player);}
   var choiceString = 'field' + computerChoice; 
   setTimeout(function(){manageGame(choiceString, 'computer', 'teal')}, 1000);
 }
@@ -498,7 +541,7 @@ function computeEndResult(playerChoice, playerResults, player) {
     for(i=0;i<playerResults.length;++i){
       var oldResult = playerResults[i];
       var newResult = parseInt(oldResult) + parseInt(playerChoice[3]);
-      if (newResult == 15){wins(player);}
+      if (newResult == 15){wins(player); break;}
     }
     if(globals.gameRound == 7){
       checkForTie(newResult);
@@ -506,24 +549,37 @@ function computeEndResult(playerChoice, playerResults, player) {
 }
 
 //function checkForTie(newResult):
-//purpose: check if there is no winner, give a respective alert and call the backToStart function
+//purpose: check if there is no winner, give a respective message
 function checkForTie(newResult){
     if(newResult != 15){
-      alert("No winner!");
-      backToStart();
+      globals.ending = true;
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
+      document.getElementById("ending").innerHTML = "No Winner!" ;
     }
 }
 
 //function wins(player):
-//purpose: give an alert, call the backToStart function
+//purpose: give a winning message
 function wins(player){
-    alert("The " + player + " wins!");
-    backToStart(); 
+  globals.ending = true;
+  if(player=='user'){
+     document.getElementById("message").innerHTML ="<div class=" + "'alert alert-success'" +  "id='ending'></div>";
+  }
+  else{
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-error'" +  "id='ending'></div>";
+  }
+     document.getElementById("ending").innerHTML = "The " + player + " wins!";
 }
 
-//function backToStart()
-//purpose: relocate to startsite after the game is over
-function backToStart() {
+//function restartGame()
+//purpose: to start a new game in the same mode
+function restartGame(){
+    location.href = "tictactoe_strategic.html";
+}
+
+//function backToMenu()
+//purpose: relocate to startsite 
+function backToMenu() {
     location.href = "start.html";
 }
 
