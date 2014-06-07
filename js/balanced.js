@@ -2,8 +2,8 @@
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
   gameRound : 0, ending: false,
-  computerChoices : [], computerResults : [], computerPossibleChoices : [],
-  userChoices : [], userResults : [],
+  computerChoices : [], computerResults : [], computerPossibleChoices : ["2","9","4","7","5","3","6","1","8"],
+  userChoices : [], userResults : [], userPossibleChoices : ["2","9","4","7","5","3","6","1","8"],
   playerTurn : " "
 }
 
@@ -52,7 +52,7 @@ function pushValue(fieldNumber, player){
 //possible choices are all fields where there is still a possibility to win
 
 function manageDeletion(fieldNumber,player){
-  deletePossibleChoices(fieldNumber);
+  deletePossibleChoices(fieldNumber, player);
   deleteFields(fieldNumber);
 }
 
@@ -62,7 +62,9 @@ function deleteFields(fieldNumber){
 }
 
 function deletePossibleChoices(fieldNumber){
+    var possibleForUser = globals.userPossibleChoices;
     var possibleForComputer = globals.computerPossibleChoices;
+    actualDelete(possibleForUser, fieldNumber);
     actualDelete(possibleForComputer, fieldNumber);
 }
 
@@ -82,7 +84,7 @@ function managePlayerTurn(fieldNumber, player){
         globals.playerTurn = 'computer';
         player = 'computer';
         disableFields();
-        computerNextRound(fieldNumber);
+        computerNextRound(fieldNumber, player);
       }
       else{
         disableFields();
@@ -103,7 +105,6 @@ function disableFields(){
 }
 
 function prepareFields(){
-  //hideButtons();
   for(i=0;i<globals.fields.length;++i){
     var field = globals.fields[i];
     var stringHandler = 'handler' + field, stringField = 'field' + field;
@@ -118,38 +119,43 @@ function prepareFields(){
 }
 
 //different strategies for computer, depending on game round
-function computerNextRound(fieldNumber) {
+function computerNextRound(fieldNumber, player) {
   if(globals.gameRound<=1){
     var computerChoice = randomChoice('globals.fields');
   }
   else {
-    var computerChoice = egocentricStrategy(fieldNumber);
+    var computerChoice = balancedStrategy(fieldNumber, player);
   }
   var choiceString = 'field' + computerChoice; 
   setTimeout(function(){manageGame(choiceString, 'computer', 'orange')}, 1000);
 }
 
 
-function egocentricStrategy(fieldNumber){
-    prepareChoices(fieldNumber);
-    if (globals.gameRound > 3){
-      var nextChoice = searchForWin();
-      if (nextChoice=="noSuccess"){
-        nextChoice = findAlternativeChoices();
-      }
-    }
-    else {
-      var nextChoice = findAlternativeChoices();
+function balancedStrategy(fieldNumber, player){
+    var choicesString = 'globals.' + player + 'PossibleChoices';
+    var possibleChoices = eval(choicesString);
+    prepareChoices(fieldNumber,player);
+    var nextChoice = searchForWin(player);
+    if (nextChoice=="noSuccess"){
+      nextChoice = findBestMove(possibleChoices,player);
     }
     return nextChoice;
 }
 
-function findAlternativeChoices(){
-  if(globals.computerPossibleChoices.length > 0 && globals.computerPossibleChoices != "0"){
-    var nextChoice = getNextChoice(globals.computerPossibleChoices);
-    if(nextChoice == "stillNoAlternative"){
-      nextChoice = getNextChoice("globals.fields");
-    }
+function findBestMove(possibleChoices,player){
+  var nextChoice = searchForWin('user');
+  if (nextChoice=="noSuccess"){
+    nextChoice = findAlternativeChoices(player);
+  }
+  return nextChoice;
+}
+
+function findAlternativeChoices(player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  if(possibleChoices.length > 0 && possibleChoices != "0"){
+    var nextChoice = getNextChoice(choicesString);
+    if(nextChoice == "stillNoAlternative"){nextChoice = getNextChoice("globals.fields");}
   }
   else{nextChoice = getNextChoice("globals.fields");}
   return nextChoice;
@@ -168,9 +174,10 @@ function getNextChoice(array){
   }
 }
 
-function prepareChoices(fieldNumber){
-  computeEgocentricChoices();
-  globals.computerPossibleChoices = makeUnique(globals.computerPossibleChoices);
+function prepareChoices(fieldNumber,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
+  computeEgocentricChoices(player, possibleChoices);
 }
     
 function randomChoice(array){ 
@@ -180,42 +187,47 @@ function randomChoice(array){
   return nextChoice;
  }
 
-function searchForWin(){
+function searchForWin(player){
+  var choicesString = 'globals.' + player + 'PossibleChoices', possibleChoices = eval(choicesString);
+  var playerString = 'globals.' + player + 'Choices', playerChoices = eval(playerString);
   var noSuccess = "noSuccess";
-  if(globals.computerPossibleChoices.length>0){
-    for(i=0;i<globals.computerPossibleChoices.length;++i){
-      var possibleWin = parseInt(globals.computerPossibleChoices[i]);
-      if(globals.gameRound>5){
-        var nextChoice = winInLastRounds(possibleWin);
-      }
-      else{
-        var addedChoices = parseInt(globals.computerChoices[0]) + parseInt(globals.computerChoices[1]);
-          if(possibleWin + addedChoices == 15){
-            var nextChoice = possibleWin;break;
-          }
-          else{var nextChoice = "noWin";}
-      }
-    }
-    if(nextChoice==possibleWin){return nextChoice;}
+  if(possibleChoices.length>0){
+    var nextChoice = getWinningMove(possibleChoices, player, noSuccess, playerChoices);
+    if(nextChoice){return nextChoice;}
     else{return noSuccess;}
   }
   else{return noSuccess;}
 }
 
-function winInLastRounds(possibleWin) {
-  for(j=0;j<globals.computerResults.length;++j){
-    var addedChoices = parseInt(globals.computerResults[j]); 
+
+function getWinningMove(possibleChoices, player, noSuccess, playerChoices){
+  for(i=0;i<possibleChoices.length;++i){
+    var possibleWin = parseInt(possibleChoices[i]);
+    if(globals.gameRound>=5){var nextChoice = winInLastRounds(possibleWin,player);if (nextChoice == possibleWin){break;}}
+    else{
+      var addedChoices = parseInt(playerChoices[0]) + parseInt(playerChoices[1]);
+      if(possibleWin + addedChoices == 15){var nextChoice = possibleWin;break;}
+      else{var nextChoice = noSuccess;}
+    }
+  }
+  return nextChoice;
+}
+
+
+function winInLastRounds(possibleWin,player) {
+  var playerResults = eval('globals.' + player + 'Results');
+  for(j=0;j<playerResults.length;++j){
+    var addedChoices = parseInt(playerResults[j]); 
     if(possibleWin + addedChoices == 15){
       var nextChoice = possibleWin;break;
     }
   }
-  var stillNoSuccess = "stillNoSuccess";
-  if(nextChoice){return nextChoice;} 
+  var stillNoSuccess = "noSuccess";
+  if(nextChoice==possibleWin){return nextChoice;} 
   else {return stillNoSuccess;}
 }
 
 function computeEgocentricChoices(){
-//alert("before compute: " + globals.computerPossibleChoices);
   for(i=0;i<globals.fields.length;++i){
     var firstPossible = globals.fields[i];
     for(j=0;j<globals.fields.length;++j){
@@ -225,16 +237,21 @@ function computeEgocentricChoices(){
   }
 }
 
-function manageChoices(firstPossible,secondPossible){
-  if(secondPossible>0 && firstPossible> 0){
+
+function manageChoices(firstPossible,secondPossible,player){
+  var choicesString = 'globals.' + player + 'PossibleChoices';
+  var possibleChoices = eval(choicesString);
     if(secondPossible != firstPossible){
-      var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
-      var adder = parseInt(computeAdder());
-      if(adder > 0 && possibleAddedFields == adder){
-        globals.computerPossibleChoices = makeUnique(globals.computerPossibleChoices);
-        globals.computerPossibleChoices.push(firstPossible, secondPossible);
-      }
+      manageActualChoices(firstPossible,secondPossible,possibleChoices);
     }
+}
+
+function manageActualChoices(firstPossible,secondPossible,possibleChoices){
+  var possibleAddedFields = parseInt(firstPossible) + parseInt(secondPossible);
+  var adder = parseInt(computeAdder());
+  if(adder > 0 && possibleAddedFields == adder){
+    possibleChoices = makeUnique(possibleChoices);
+    possibleChoices.push(firstPossible, secondPossible);
   }
 }
 
@@ -317,7 +334,7 @@ function backToMenu() {
 }
 
 function restartGame(){
-    location.href = "tictactoe_egocentric.html";
+    location.href = "tictactoe_balanced.html";
 }
 
 
