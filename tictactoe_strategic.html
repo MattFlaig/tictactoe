@@ -13,45 +13,56 @@
       <script src="bootstrap/js/bootstrap.min.js"></script>
      
   </head>
-  <body class="strategic" onload="AskUser();">
+  <body class="strategic">
     <div class="center hero-unit">
     <h2>Let's play TicTacToe!</h2>
     <h4>Computer playing style: strategic</h4>
-    <table>
-      <tr>
-          <td onclick="manageGame('field2', 'user', 'black');" >
-            <div id="field2"></div>
-          </td>
-          <td onclick="manageGame('field9', 'user', 'black');" >
-            <div id="field9"></div>
-          </td>
-          <td onclick="manageGame('field4', 'user', 'black');" >
-            <div id="field4"></div>
-          </td>
-      </tr>
-      <tr>
-          <td onclick="manageGame('field7', 'user', 'black');" >
-            <div id="field7"></div>
-          </td>
-          <td onclick="manageGame('field5', 'user', 'black');" >
-            <div id="field5"></div>
-          </td>
-          <td onclick="manageGame('field3', 'user', 'black');" >
-            <div id="field3"></div>
-          </td>
-      </tr>
-      <tr>
-          <td onclick="manageGame('field6', 'user', 'black');" >
-            <div id="field6"></div>
-          </td>
-          <td onclick="manageGame('field1', 'user', 'black');" >
-            <div id="field1"></div>
-          </td>
-          <td onclick="manageGame('field8', 'user', 'black');" >
-            <div id="field8"></div>
-          </td>
-      </tr>
-    </table>  
-    </div>  
+    </br>
+      <div class="btn-group"> 
+        
+          <button class="btn btn-large ingroup" onclick="whoBegins('user');">
+          User begins
+          </button>
+          <button class="btn btn-large ingroup" onclick="whoBegins('computer');">
+          Computer begins
+          </button>
+          <button class="btn btn-large ingroup" onclick="backToMenu();">
+          Back to menu
+          </button>
+          <button class="btn btn-large ingroup" onclick="restartGame();">
+          Restart
+          </button>
+          
+      </div>
+      
+      <table>
+        <tr>
+            <td id="handler2">
+            </td>
+            <td id="handler9">
+            </td>
+            <td id="handler4">
+            </td>
+        </tr>
+        <tr>
+            <td id="handler7">
+            </td>
+            <td id="handler5">
+            </td>
+            <td id="handler3">
+            </td>
+        </tr>
+        <tr>
+            <td id="handler6">
+            </td>
+            <td id="handler1">
+            </td>
+            <td id="handler8">
+            </td>
+        </tr>
+      </table>
+      <div id="message">
+      </div>
+    </div> 
   </body>
 </html>

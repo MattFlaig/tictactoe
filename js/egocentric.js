@@ -1,18 +1,30 @@
 //namespace for global variables
 var globals = { 
   fields : ["2","9","4","7","5","3","6","1","8"],
-  gameRound : 0,
+  gameRound : 0, ending: false,
   computerChoices : [], computerResults : [], computerPossibleChoices : [],
-  userChoices : [], userResults : []
+  userChoices : [], userResults : [],
+  playerTurn : " "
 }
 
 
-function AskUser() {
-    var askTurn = confirm("If you want to begin, please press ok");
-    if (!askTurn) {
+function whoBegins(player) {
+  if(globals.gameRound==0){
+    if (player == "computer") {
+        globals.playerTurn = "computer";
+        prepareFields();
         computerNextRound();
     }
+    else{
+        globals.playerTurn = "user";
+        prepareFields();
+    }
+  }
+  else{
+    disableFields();
+  }
 }
+
 
 //function for game engine
 function manageGame(id, player, colour){
@@ -65,13 +77,44 @@ function actualDelete(possibleChoices, fieldNumber){
 
 //to manage who's turn it is
 function managePlayerTurn(fieldNumber, player){
-    if (player === 'user'){
-      player = 'computer';
-      computerNextRound(fieldNumber);
+    if (player == 'user'){
+      if(globals.ending == false){
+        globals.playerTurn = 'computer';
+        player = 'computer';
+        disableFields();
+        computerNextRound(fieldNumber);
+      }
+      else{
+        disableFields();
+      }
     }
     else {
       player = 'user';
+      globals.playerTurn = 'user';
+      prepareFields();
     }
+}
+
+function disableFields(){
+  for(var i=0;i<9; ++i){
+    var fieldString = 'field' + (i+1);
+    document.getElementById(fieldString).onclick = "event.cancelBubble = true;";
+  }
+}
+
+function prepareFields(){
+  //hideButtons();
+  for(i=0;i<globals.fields.length;++i){
+    var field = globals.fields[i];
+    var stringHandler = 'handler' + field, stringField = 'field' + field;
+    if(globals.playerTurn == 'computer'){
+      document.getElementById(stringHandler).innerHTML = "<div id= " + "'" + stringField + "'" + "></div>";
+    } 
+    else{
+      document.getElementById(stringHandler).innerHTML = "<div id= '" + stringField + "' onclick =\"manageGame(" +
+                                                         "'field" + field + "','user', 'black');\"></div>";
+    }
+  }
 }
 
 //different strategies for computer, depending on game round
@@ -243,7 +286,7 @@ function computeEndResult(playerChoice, playerResults, player) {
     for(i=0;i<playerResults.length;++i){
       var oldResult = playerResults[i];
       var newResult = parseInt(oldResult) + parseInt(playerChoice[3]);
-      if (newResult == 15){wins(player);}
+      if (newResult == 15){wins(player); break;}
     }
     if(globals.gameRound == 7){
       checkForTie(newResult);
@@ -252,18 +295,29 @@ function computeEndResult(playerChoice, playerResults, player) {
 
 function checkForTie(newResult){
     if(newResult != 15){
-      alert("No winner!");
-      backToStart();
+      globals.ending = true;
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
+      document.getElementById("ending").innerHTML = "No Winner!" ;
     }
 }
 
 function wins(player){
-    alert("The " + player + " wins!");
-    backToStart(); 
+  globals.ending = true;
+  if(player=='user'){
+     document.getElementById("message").innerHTML ="<div class=" + "'alert alert-success'" +  "id='ending'></div>";
+  }
+  else{
+      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-error'" +  "id='ending'></div>";
+  }
+     document.getElementById("ending").innerHTML = "The " + player + " wins!";
 }
 
-function backToStart() {
+function backToMenu() {
     location.href = "start.html";
+}
+
+function restartGame(){
+    location.href = "tictactoe_egocentric.html";
 }
 
 
