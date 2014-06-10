@@ -106,6 +106,7 @@ function actualDelete(possibleChoices, fieldNumber){
 
 //function managePlayerTurn(fieldNumber, player)
 //purpose: to manage who's turn it is and prepare/disable fields during the game
+//(User should not be able to choose a field during computer’s turn)
 function managePlayerTurn(fieldNumber, player){
     if (player == 'user'){
       if(globals.ending == false){
@@ -125,6 +126,8 @@ function managePlayerTurn(fieldNumber, player){
     }
 }
 
+//function disableFields()
+//Purpose: to disable the klick event on the fields during computer's turn
 function disableFields(){
   for(var i=0;i<9; ++i){
     var fieldString = 'field' + (i+1);
@@ -132,6 +135,8 @@ function disableFields(){
   }
 }
 
+//function prepareFields()
+//Purpose: to enable the click event on the fields during user's turn
 function prepareFields(){
   //hideButtons();
   for(i=0;i<globals.fields.length;++i){
