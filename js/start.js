@@ -2,8 +2,8 @@ function chaotic(){
     location.href = "tictactoe_chaotic.html";
 }
 
-function egocentric(){
-    location.href = "tictactoe_egocentric.html";
+function balanced(){
+    location.href = "tictactoe_balanced.html";
 }
 
 function strategic(){

@@ -7,7 +7,6 @@ var globals = {
   playerTurn : " "
 }
 
-//prompt to ask user if he wants to begin
 function whoBegins(player) {
   if(globals.gameRound==0){
     if (player == "computer") {
