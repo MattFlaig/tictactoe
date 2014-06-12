@@ -74,6 +74,7 @@ function managePlayerTurn(player){
       player = 'user';
       globals.playerTurn = 'user';
       prepareFields();
+      if(ending){disableFields();}
     }
 }
 

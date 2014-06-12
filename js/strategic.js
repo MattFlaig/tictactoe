@@ -123,6 +123,7 @@ function managePlayerTurn(fieldNumber, player){
       player = 'user';
       globals.playerTurn = 'user';
       prepareFields();
+      if(ending){disableFields();}
     }
 }
 
