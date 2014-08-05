@@ -1,0 +1,67 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+  <head>
+      <title>TicTacToe</title>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
+      <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <script type="text/javascript" src="js/board.js"></script>
+      <script type="text/javascript" src="js/chaotic/game_chaotic.js"></script>
+      <script type="text/javascript" src="js/chaotic/player_chaotic.js"></script>
+      <script src="http://code.jquery.com/jquery.js"></script>
+      <script src="bootstrap/js/bootstrap.min.js"></script>
+  </head>
+
+  <body class="chaotic">
+    <div class="heading">
+      <h2>Let's play TicTacToe!</h2>
+      <h4>Computer playing style: chaotic</h4></br>
+    </div>
+    <div class="center hero-unit">
+      <div class="btn-group"> 
+          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('user');">
+          User begins
+          </button>
+          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('computer');">
+          Computer begins
+          </button>
+          <button class="btn btn-large ingroup" onclick="ticTacToe.backToMenu();">
+          Back to menu
+          </button>
+          <button class="btn btn-large ingroup" onclick="ticTacToe.restart();">
+          Restart
+          </button>
+      </div>
+      <table>
+        <tr>
+          <td id="handler2">
+          </td>
+          <td id="handler9">
+          </td>
+          <td id="handler4">
+          </td>
+        </tr>
+        <tr>
+          <td id="handler7">
+          </td>
+          <td id="handler5">
+          </td>
+          <td id="handler3">
+          </td>
+        </tr>
+        <tr>
+          <td id="handler6">
+          </td>
+          <td id="handler1">
+          </td>
+          <td id="handler8">
+          </td>
+        </tr>
+      </table>
+      <div id="message"></div>
+    </div> 
+  </body>
+</html>
