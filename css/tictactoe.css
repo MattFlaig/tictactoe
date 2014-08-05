@@ -12,23 +12,19 @@ body
     padding-bottom: 50px;
     
 }
-
-body h1
+body .heading
 {
     font-family: 'Muli', sans-serif;
+    color: black;
 }
 
-body h3 
-{
-    font-family: 'Muli', sans-serif;
-}
 
 body .center
 {
     font-family: 'Muli', sans-serif;
-    width: 700px;
-    height: 700px;
-    background-color: #eee;
+    width: 600px;
+    height: 600px;
+    background-color: #fff;
     margin-left: auto;
     margin-right: auto;
 }
@@ -76,6 +72,7 @@ table td
 {
     width:100px;
     height:100px;
+    background: #eee;
 }
 
 
@@ -138,7 +135,7 @@ font-family: 'Muli', sans-serif;
 #ending
 {
   text-align: center;
-  width:400px;
+  width:500px;
   margin-left: auto;
   margin-right: auto;
 }
