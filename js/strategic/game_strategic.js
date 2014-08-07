@@ -135,7 +135,7 @@ var ticTacToe = {
     document.getElementById("ending").innerHTML = "The " + ticTacToe.turn + " wins!";
   },
   backToMenu : function(){
-    location.href = "start.html";
+    location.href = "index.html";
   },
   restart : function(){
     location.href = "strategic.html";
