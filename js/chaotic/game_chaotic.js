@@ -34,7 +34,7 @@ var ticTacToe = {
   computerTurn : function(){
     var field = ticTacToe.computeRandomField();
     var fieldNumber = field[5];
-    board.loadImage(field, computer.colour); 
+    board.loadImage(field, computer.colour);
     ticTacToe.pushValue(fieldNumber);
     if(ticTacToe.round>=4){ticTacToe.computeResult(computer.choices, computer.results);}
     board.deleteFields(fieldNumber);
@@ -48,7 +48,10 @@ var ticTacToe = {
         board.disable();
         setTimeout(function(){ticTacToe.computerTurn()}, 1000);
       }
-      else{board.disable();}
+      else{
+        board.setDefaultCursor();
+        board.disable();
+      }
     }
     else {
       ticTacToe.turn = 'user';
@@ -63,7 +66,7 @@ var ticTacToe = {
     var fields = board.fields;
     var choiceIndex = Math.floor(Math.random() * (fields.length));
     var fieldNumber = fields[choiceIndex];
-    var randomField = 'field' + fieldNumber; 
+    var randomField = 'field' + fieldNumber;
     return randomField;
   },
   pushValue : function(fieldNumber){
@@ -78,7 +81,7 @@ var ticTacToe = {
       if(result === ticTacToe.WINNING_SUM){ticTacToe.winner();}
       else{ ticTacToe.addFirstResults(playerChoices, playerResults);}
     }
-    else if(ticTacToe.round === 6 || ticTacToe.round === 7){ 
+    else if(ticTacToe.round === 6 || ticTacToe.round === 7){
       var nextResult = ticTacToe.computeNextResult(playerChoices, playerResults);
     }
     else {
@@ -111,7 +114,7 @@ var ticTacToe = {
         var combinedWithLast = parseInt(playerChoices[4]) + parseInt(combined);
         if (combinedWithLast === ticTacToe.WINNING_SUM){ticTacToe.winner(); break;}
       }
-    }  
+    }
     if(!ticTacToe.ending){
       ticTacToe.checkForTie();
     }
@@ -134,6 +137,24 @@ var ticTacToe = {
   },
   restart : function(){
     location.href = "chaotic.html";
-  } 
-  
+  }
+
 }
+
+$(document).ready(function(){
+  $('#userBegins').on('click', function(){
+    ticTacToe.whoBegins('user');
+  });
+
+  $('#computerBegins').on('click', function(){
+    ticTacToe.whoBegins('computer');
+  });
+
+  $('#back').on('click', function(){
+    ticTacToe.backToMenu();
+  });
+
+  $('#restart').on('click', function(){
+    ticTacToe.restart();
+  });
+});

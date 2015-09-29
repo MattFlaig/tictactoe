@@ -8,10 +8,10 @@
       <meta http-equiv="content-type" content="text/html; charset=utf-8" />
       <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
       <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <script src="http://code.jquery.com/jquery.js"></script>
       <script type="text/javascript" src="js/board.js"></script>
       <script type="text/javascript" src="js/chaotic/game_chaotic.js"></script>
       <script type="text/javascript" src="js/chaotic/player_chaotic.js"></script>
-      <script src="http://code.jquery.com/jquery.js"></script>
       <script src="bootstrap/js/bootstrap.min.js"></script>
   </head>
 
@@ -21,47 +21,56 @@
       <h4>Computer playing style: chaotic</h4></br>
     </div>
     <div class="center hero-unit">
-      <div class="btn-group"> 
-          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('user');">
+      <div class="btn-group">
+          <button class="btn btn-large ingroup begin" id='userBegins'>
           User begins
           </button>
-          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('computer');">
+          <button class="btn btn-large ingroup begin" id='computerBegins'>
           Computer begins
           </button>
-          <button class="btn btn-large ingroup" onclick="ticTacToe.backToMenu();">
+          <button class="btn btn-large ingroup" id='back'>
           Back to menu
           </button>
-          <button class="btn btn-large ingroup" onclick="ticTacToe.restart();">
+          <button class="btn btn-large ingroup" id='restart'>
           Restart
           </button>
       </div>
       <table>
         <tr>
-          <td id="handler2">
+          <td>
+            <div class="fields" id="field2"></div>
           </td>
-          <td id="handler9">
+          <td>
+            <div class="fields" id="field9"></div>
           </td>
-          <td id="handler4">
-          </td>
-        </tr>
-        <tr>
-          <td id="handler7">
-          </td>
-          <td id="handler5">
-          </td>
-          <td id="handler3">
+          <td>
+            <div class="fields" id="field4"></div>
           </td>
         </tr>
         <tr>
-          <td id="handler6">
+          <td>
+            <div class="fields" id="field7"></div>
           </td>
-          <td id="handler1">
+          <td>
+            <div class="fields" id="field5"></div>
           </td>
-          <td id="handler8">
+          <td>
+            <div class="fields" id="field3"></div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="fields" id="field6"></div>
+          </td>
+          <td>
+            <div class="fields" id="field1"></div>
+          </td>
+          <td>
+            <div class="fields" id="field8"></div>
           </td>
         </tr>
       </table>
       <div id="message"></div>
-    </div> 
+    </div>
   </body>
 </html>

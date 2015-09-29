@@ -1,50 +1,36 @@
 //BOARD OBJECT
 var board = {
   fields : ["2","9","4","7","5","3","6","1","8"],
-  
+
   prepare : function(){
-    for(var i=0;i<board.fields.length;++i){
-      var field = board.fields[i];
-      var stringHandler = 'handler' + field, stringField = 'field' + field;
-      if(ticTacToe.turn === 'computer'){
-        document.getElementById(stringHandler).innerHTML = "<div id= " + "'" + stringField + "'" + "></div>";
-      } 
-      else{
-        document.getElementById(stringHandler).innerHTML = "<div id= '" + stringField + "' onclick =\"ticTacToe.userTurn(" +
-                                                           "'field" + field + "');\"></div>";
-      }
+    if(ticTacToe.turn === 'user'){
+      $('.fields').on('click', function(e){
+        var id = e.target.id;
+        ticTacToe.userTurn(id);
+      });
+      board.enablePointerCursor();
     }
-    board.setDefaultCursor();
-    board.enablePointerCursor();
+    else{
+      board.setDefaultCursor();
+    }
   },
   disable : function(){
-    for(var i=0;i<9; ++i){
-      var fieldString = 'field' + (i+1);
-      document.getElementById(fieldString).onclick = "event.cancelBubble = true;";
-    }
+    $('.fields').off('click');
   },
   setDefaultCursor : function(){
-    var allFields = ["2","9","4","7","5","3","6","1","8"];
-    for(var i=0;i<allFields.length;++i){
-      var singleField = allFields[i];
-      var singleString = 'field' + singleField;
-      document.getElementById(singleString).style.cursor="default";
-    }
+    $('td div').css('cursor', 'default');
   },
   enablePointerCursor : function(){
-    for(var i=0;i<board.fields.length;++i){
-      var singleField = board.fields[i];
-      var singleString = 'field' + singleField;
-      document.getElementById(singleString).style.cursor="pointer";
-    }
+    $('.fields').css('cursor', 'pointer');
   },
-  loadImage : function(field, colour){
-    document.getElementById(field).style.background = colour;
+  loadImage : function(field, color){
+    $('#' + field).css('background-color', color);
   },
   deleteFields : function(fieldNumber){
-    for(var i = 0; i<board.fields.length; ++i){
-      var singleField = board.fields[i];
-      if(fieldNumber == singleField){board.fields.splice(i,1);}
+    var index = board.fields.indexOf(fieldNumber);
+    if (index){
+      board.fields.splice(index,1);
+      $('#field' + fieldNumber).removeClass('fields');
     }
   }
 }

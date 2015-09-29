@@ -20,7 +20,7 @@ var computer = {
   makeUnique : function(array){
     var hash = {}, uniqueArray = [];
     for ( var i = 0; i < array.length; ++i ) {
-      if ( !hash.hasOwnProperty(array[i]) ) { 
+      if ( !hash.hasOwnProperty(array[i]) ) {
           hash[ array[i] ] = true;
           uniqueArray.push(array[i]);
       }
@@ -43,7 +43,7 @@ var computer = {
     return nextChoice;
   },
   findAlternativeChoices : function(){
-    if(computer.possibleChoices.length > 0){ 
+    if(computer.possibleChoices.length > 0){
       var nextChoice = computer.getNextChoice(computer.possibleChoices);
       if(nextChoice == "stillNoAlternative"){nextChoice = computer.getNextChoice(board.fields);}
     }
@@ -52,13 +52,7 @@ var computer = {
   },
   getNextChoice : function(array){
     var nextChoice = computer.getRandomChoice(array);
-    if(parseInt(nextChoice) > 0){
-      return nextChoice;
-    }
-    else{
-      var stillNoAlternative = "stillNoAlternative";
-      return stillNoAlternative;
-    }
+    return (parseInt(nextChoice) > 0) ? nextChoice : "stillNoAlternative";
   },
   getRandomChoice : function(array){
     var possibleIndex = Math.floor(Math.random() * (array.length));
@@ -77,7 +71,7 @@ var computer = {
         if(secondPossible != firstPossible){
           computer.manageChoices(firstPossible,secondPossible);
         }
-      } 
+      }
     }
   },
   manageChoices : function(firstPossible,secondPossible){
@@ -121,14 +115,14 @@ var computer = {
   },
   winInNextRounds : function(possibleWin){
     for(var j = 0;j < computer.results.length; ++j){
-      var addedChoices = parseInt(computer.results[j]); 
+      var addedChoices = parseInt(computer.results[j]);
       if(possibleWin + addedChoices == ticTacToe.WINNING_SUM){
         var nextChoice = possibleWin;break;
       }
     }
     var stillNoSuccess = "noSuccess";
-    if(nextChoice == possibleWin){return nextChoice;} 
-    else {return stillNoSuccess;} 
+    if(nextChoice == possibleWin){return nextChoice;}
+    else {return stillNoSuccess;}
   },
   winInLastRounds : function(possibleWin){
     for(var k = 0;k < computer.choices.length; ++k){
@@ -143,8 +137,8 @@ var computer = {
       }
     }
     var stillNoSuccess = "noSuccess";
-    if(nextChoice == possibleWin){return nextChoice;} 
-    else {return stillNoSuccess;} 
+    if(nextChoice == possibleWin){return nextChoice;}
+    else {return stillNoSuccess;}
   }
 
 
