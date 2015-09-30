@@ -23,12 +23,12 @@ var board = {
   enablePointerCursor : function(){
     $('.fields').css('cursor', 'pointer');
   },
-  loadImage : function(field, color){
-    $('#' + field).css('background-color', color);
+  loadImage : function(field, colour){
+    $('#' + field).css('background-color', colour);
   },
   deleteFields : function(fieldNumber){
     var index = board.fields.indexOf(fieldNumber);
-    if (index){
+    if (index !== undefined){
       board.fields.splice(index,1);
       $('#field' + fieldNumber).removeClass('fields');
     }
