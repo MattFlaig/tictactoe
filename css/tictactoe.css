@@ -129,7 +129,7 @@ table td
 }
 
 
-/*BUTTONS*/
+/*GENERAL BUTTONS*/
 
 .ingroup{
   font-family: 'Muli', sans-serif;
@@ -141,6 +141,14 @@ table td
 	font-family: 'Muli', sans-serif;
   float: left;
 }
+
+.btn.focus, .btn:focus, .btn:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+
+/*MAROON BUTTONS*/
 
 .btn-maroon {
     border-color: maroon;
@@ -154,14 +162,59 @@ table td
   color: #ffffff;
 }
 
-.btn.focus, .btn:focus, .btn:hover {
-  color: #fff;
-  text-decoration: none;
-}
-
 .maroon-message{
   border-color: maroon;
   background-color: #500000;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 12px;
+  width:100%;
+  font-size: 1.7rem;
+}
+
+
+/*ORANGE BUTTONS*/
+
+.btn-orange {
+    border-color: orange;
+    background-color: orange;
+    color: #ffffff;
+
+}
+.btn-orange:hover {
+  border-color: orange;
+  background-color: #FF8500;
+  color: #ffffff;
+}
+
+.orange-message{
+  border-color: orange;
+  background-color: #FF6500;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 12px;
+  width:100%;
+  font-size: 1.7rem;
+}
+
+
+/*TEAL BUTTONS*/
+
+.btn-teal {
+    border-color: teal;
+    background-color: teal;
+    color: #ffffff;
+
+}
+.btn-teal:hover {
+  border-color: teal;
+  background-color: #006080;
+  color: #ffffff;
+}
+
+.teal-message{
+  border-color: teal;
+  background-color: #004080;
   color: #ffffff;
   border-radius: 5px;
   padding: 12px;

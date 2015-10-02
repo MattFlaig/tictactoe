@@ -6,63 +6,112 @@
   <head>
       <title>TicTacToe</title>
       <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
       <link rel="stylesheet" type="text/css" href="css/tictactoe.css" />
-      <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <script src="http://code.jquery.com/jquery.js"></script>
       <script type="text/javascript" src="js/board.js"></script>
       <script type="text/javascript" src="js/strategic/game_strategic.js"></script>
       <script type="text/javascript" src="js/strategic/computer_strategic.js"></script>
       <script type="text/javascript" src="js/strategic/user_strategic.js"></script>
-      <script src="http://code.jquery.com/jquery.js"></script>
-      <script src="bootstrap/js/bootstrap.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
   </head>
 
   <body class="strategic">
-    <div class="heading">
-      <h2>Let's play TicTacToe!</h2>
-      <h4>Computer playing style: strategic</h4></br>
-    </div>
-    <div class="center hero-unit">
-      <div class="btn-group"> 
-          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('user');">
-          User begins
-          </button>
-          <button class="btn btn-large ingroup begin" onclick="ticTacToe.whoBegins('computer');">
-          Computer begins
-          </button>
-          <button class="btn btn-large ingroup" onclick="ticTacToe.backToMenu();">
-          Back to menu
-          </button>
-          <button class="btn btn-large ingroup" onclick="ticTacToe.restart();">
-          Restart
-          </button>
+    <div class="container">
+      <div class="jumbotron">
+
+        <div class="row">
+          <div class="col-sm-offset-2 col-sm-8">
+            <div class="heading">
+              <h2>Let's play TicTacToe!</h2>
+              <h4>Computer playing style: balanced</h4></br>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <button class="btn btn-lg btn-teal ingroup begin" id='userBegins'>
+                User begins
+                </button>
+              </div>
+              <div class="col-sm-6">
+                <button class="btn btn-lg btn-teal ingroup begin" id='computerBegins'>
+                Computer begins
+                </button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <button class="btn btn-lg btn-teal ingroup" id='back'>
+                Back to menu
+                </button>
+              </div>
+              <div class="col-sm-6">
+                <button class="btn btn-lg btn-teal ingroup" id='restart'>
+                Restart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-offset-2 col-sm-8">
+            <table class="table">
+              <div class="row">
+                <div class="col-sm-9">
+                  <tr>
+                    <td>
+                      <div class="fields" id="field2"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field9"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field4"></div>
+                    </td>
+                  </tr>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-9">
+                  <tr>
+                    <td>
+                      <div class="fields" id="field7"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field5"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field3"></div>
+                    </td>
+                  </tr>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-9">
+                  <tr>
+                    <td>
+                      <div class="fields" id="field6"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field1"></div>
+                    </td>
+                    <td>
+                      <div class="fields" id="field8"></div>
+                    </td>
+                  </tr>
+                </div>
+              </div>
+            </table>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-offset-2 col-sm-8">
+            <div id="message"></div>
+          </div>
+        </div>
+
       </div>
-      <table>
-        <tr>
-          <td id="handler2">
-          </td>
-          <td id="handler9">
-          </td>
-          <td id="handler4">
-          </td>
-        </tr>
-        <tr>
-          <td id="handler7">
-          </td>
-          <td id="handler5">
-          </td>
-          <td id="handler3">
-          </td>
-        </tr>
-        <tr>
-          <td id="handler6">
-          </td>
-          <td id="handler1">
-          </td>
-          <td id="handler8">
-          </td>
-        </tr>
-      </table>
-      <div id="message"></div>
-    </div> 
+    </div>
   </body>
 </html>
