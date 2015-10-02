@@ -183,7 +183,7 @@ table td
 }
 .btn-orange:hover {
   border-color: orange;
-  background-color: #FF8500;
+  background-color: #FF9500;
   color: #ffffff;
 }
 
@@ -208,13 +208,13 @@ table td
 }
 .btn-teal:hover {
   border-color: teal;
-  background-color: #006080;
+  background-color: #007070;
   color: #ffffff;
 }
 
 .teal-message{
   border-color: teal;
-  background-color: #004080;
+  background-color: #005050;
   color: #ffffff;
   border-radius: 5px;
   padding: 12px;

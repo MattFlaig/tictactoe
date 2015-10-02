@@ -10,6 +10,21 @@ var start = {
 	}
 }
 
+$(document).ready(function(){
+  $('#chaotic').on('click', function(){
+    start.chaotic();
+  });
+
+  $('#balanced').on('click', function(){
+    start.balanced();
+  });
+
+  $('#strategic').on('click', function(){
+    start.strategic();
+  });
+
+});
+
 
 
 

@@ -29,13 +29,13 @@ var ticTacToe = {
     ticTacToe.endOfRound(fieldNumber);
   },
   computerTurn : function(){
-    var fieldNumber = ticTacToe.getFieldNumber();
+    var fieldNumber = ticTacToe.getBalancedField();
     board.loadImage("field" + fieldNumber, computer.colour);
     ticTacToe.pushValue(fieldNumber);
     if(ticTacToe.round>=4){ ticTacToe.computeResult(computer.choices); }
     ticTacToe.endOfRound(fieldNumber);
   },
-  getFieldNumber : function(){
+  getBalancedField : function(){
     if(ticTacToe.round <= 1){ var fieldNumber = computer.getRandomChoice(board.fields); }
     else{ var fieldNumber = computer.balancedStrategy(); }
     return fieldNumber;

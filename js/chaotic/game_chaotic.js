@@ -22,21 +22,21 @@ var ticTacToe = {
     }
   },
   userTurn : function(field){
-    var fieldNumber = ticTacToe.manageFieldNumber(field, user.colour);
+    var fieldNumber = field[5];
+    board.loadImage(field, user.colour);
+    ticTacToe.pushValue(fieldNumber);
     if(ticTacToe.round>=4){ ticTacToe.computeResult(user.choices); }
     ticTacToe.endOfRound(fieldNumber);
   },
   computerTurn : function(){
-    var field = ticTacToe.computeRandomField();
-    var fieldNumber = ticTacToe.manageFieldNumber(field, computer.colour);
+    var fieldNumber = ticTacToe.getChaoticField();
+    board.loadImage("field" + fieldNumber, computer.colour);
+    ticTacToe.pushValue(fieldNumber);
     if(ticTacToe.round>=4){ ticTacToe.computeResult(computer.choices); }
     ticTacToe.endOfRound(fieldNumber);
   },
-  manageFieldNumber : function(field, colour){
-    var fieldNumber = field[5];
-    board.loadImage(field, colour);
-    ticTacToe.pushValue(fieldNumber);
-    return fieldNumber;
+  getChaoticField : function(){
+    return ticTacToe.computeRandomField();
   },
   endOfRound : function(fieldNumber){
     board.deleteFields(fieldNumber);
@@ -72,8 +72,7 @@ var ticTacToe = {
     var fields = board.fields;
     var choiceIndex = Math.floor(Math.random() * (fields.length));
     var fieldNumber = fields[choiceIndex];
-    var randomField = 'field' + fieldNumber;
-    return randomField;
+    return fieldNumber;
   },
   pushValue : function(fieldNumber){
     if(ticTacToe.turn === 'user'){var playerChoices = user.choices;}

@@ -7,8 +7,7 @@ var computer = {
   clearPossibleChoices : function(chosen){
     computer.possibleChoices = computer.makeUnique(computer.possibleChoices);
     for(var i=0; i<chosen.length;++i){
-      var choice = chosen[i];
-      var index = computer.possibleChoices.indexOf(choice);
+      var index = computer.possibleChoices.indexOf(chosen[i]);
       if(index >= 0){ computer.possibleChoices.splice(index,1); }
     }
   },

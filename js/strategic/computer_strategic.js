@@ -20,7 +20,7 @@ var computer = {
   makeUnique : function(array){
     var hash = {}, uniqueArray = [];
     for ( var i = 0; i < array.length; ++i ) {
-      if (!hash.hasOwnProperty(array[i])) { 
+      if (!hash.hasOwnProperty(array[i])) {
           hash[ array[i] ] = true;
           uniqueArray.push(array[i]);
       }
@@ -30,7 +30,7 @@ var computer = {
   getDoubledElements : function(array){
     var hash = {}, doubledArray = [];
     for ( var i = 0; i < array.length; ++i ) {
-      if (hash.hasOwnProperty(array[i])) { 
+      if (hash.hasOwnProperty(array[i])) {
           hash[ array[i] ] = true;
           doubledArray.push(array[i]);
       }
