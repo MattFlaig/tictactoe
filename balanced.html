@@ -24,7 +24,7 @@
           <div class="col-sm-offset-2 col-sm-8">
             <div class="heading">
               <h2>Let's play TicTacToe!</h2>
-              <h4>Computer playing style: balanced</h4></br>
+              <h4 id="playingStyle">Computer playing style: balanced</h4></br>
             </div>
             <div class="row">
               <div class="col-sm-6">
@@ -40,9 +40,19 @@
             </div>
             <div class="row">
               <div class="col-sm-6">
-                <button class="btn btn-lg btn-orange ingroup" id='back'>
+                <!--<button class="btn btn-lg btn-orange ingroup" id='back'>
                 Back to menu
-                </button>
+                </button>-->
+                <div class="btn-group ingroup">
+                  <button type="button" class="btn btn-orange btn-lg dropdown-toggle ingroup" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Playing style <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="setPlayingStyle">
+                    <li><a id="chaotic">Chaotic</a></li>
+                    <li><a id="balanced">Balanced</a></li>
+                    <li><a id="strategic">Strategic</a></li>
+                  </ul>
+                </div>
               </div>
               <div class="col-sm-6">
                 <button class="btn btn-lg btn-orange ingroup" id='restart'>

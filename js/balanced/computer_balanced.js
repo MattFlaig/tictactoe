@@ -2,6 +2,7 @@
 var computer = {
   choices : [],
   colour : "orange",
+  playingStyle : "balanced",
   possibleChoices : [],
 
   clearPossibleChoices : function(chosen){

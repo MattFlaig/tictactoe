@@ -4,7 +4,17 @@ var ticTacToe = {
   ending : false,
   turn : " ",
   WINNING_SUM : 15,
+  styles :  {
+              "chaotic" : "maroon",
+              "balanced" : "orange",
+              "strategic" : "teal"
+            },
 
+  setPlayingStyle : function(oldStyle, newStyle){
+    computer.playingStyle = newStyle;
+    $('#playingStyle').text("Computer playing style: " + newStyle);
+    board.setColour(ticTacToe.styles[oldStyle], ticTacToe.styles[newStyle]);
+  },
   whoBegins : function(nextPlayer){
     if(ticTacToe.round === 0){
       ticTacToe.disableButtons();
@@ -147,5 +157,11 @@ $(document).ready(function(){
 
   $('#restart').on('click', function(){
     ticTacToe.restart();
+  });
+
+  $('#setPlayingStyle li a').on('click', function(){
+    var oldStyle = computer.playingStyle;
+    var newStyle = $(this).attr('id');
+    ticTacToe.setPlayingStyle(oldStyle, newStyle);
   });
 });

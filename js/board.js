@@ -2,6 +2,12 @@
 var board = {
   fields : ["2","9","4","7","5","3","6","1","8"],
 
+  setColour : function(oldStyle, newStyle){
+    $('body').css('background-color', newStyle);
+    computer.colour = newStyle;
+    $('.btn').removeClass('btn-' + oldStyle);
+    $('.btn').addClass('btn-' + newStyle);
+  },
   prepare : function(){
     if(ticTacToe.turn === 'user'){
       $('.fields').on('click', function(e){
