@@ -7,10 +7,9 @@ body
 	  text-align: center;
     font-family: 'Muli', sans-serif;
     padding-top: 50px;
-    padding-right: 100px;
-    padding-left: 100px;
+    /*padding-right: 50px;
+    padding-left: 50px;*/
     padding-bottom: 50px;
-    
 }
 body .heading
 {
@@ -19,14 +18,15 @@ body .heading
 }
 
 
-body .center
+body .jumbotron
 {
     font-family: 'Muli', sans-serif;
-    width: 600px;
-    height: 600px;
+    padding-left: 25px;
+    padding-right: 25px;
     background-color: #fff;
     margin-left: auto;
     margin-right: auto;
+    padding-bottom: 50px;
 }
 
 
@@ -52,26 +52,24 @@ body .center
 
 /*BASIC TABLE*/
 
-table 
+.table
 {
 	  border: 2px solid #666;
 	  margin-left: auto;
     margin-right: auto;
     margin-top: 50px;
     margin-bottom: 50px;
-    width: 400px;
-    height: 400px;
+    width: auto;
+    height: auto;
 }
 
-table tr td 
+table tr td
 {
     border: 2px solid #666;
-    border-collapse:collapse;  
+    border-collapse:collapse;
 }
-table td 
+table td
 {
-    width:100px;
-    height:100px;
     background: #eee;
 }
 
@@ -79,63 +77,147 @@ table td
 
 /*FIELDS*/
 
-#field1, #field2, #field3,
-#field4, #field5, #field6,
-#field7, #field8, #field9
+#field1,#field2,#field3,
+#field4,#field5,#field6,
+#field7,#field8,#field9
 {
    border-radius: 50%;
-   width: 100px;
-   height: 100px;
    background: white;
    margin: auto;
 }
 
-
-
-/*BUTTONS*/
-
-.buttons
-{
-    padding: 30px;
-    width: 650px;
-    margin-left: auto;
-    margin-right: auto;
-    
+@media (max-width: 767px) {
+  #field1,#field2,#field3,
+  #field4,#field5,#field6,
+  #field7,#field8,#field9{
+    width: 50px;
+    height: 50px;
+  }
+}
+@media (min-width: 768px) {
+  #field1,#field2,#field3,
+  #field4,#field5,#field6,
+  #field7,#field8,#field9{
+    width: 100px;
+    height: 100px;
+  }
+  #message{
+    max-width: 450px;
+  }
+}
+@media (min-width: 992px) {
+  #field1,#field2,#field3,
+  #field4,#field5,#field6,
+  #field7,#field8,#field9{
+    width: 150px;
+    height: 150px;
+  }
+  #message{
+    max-width: 600px;
+  }
+}
+@media (min-width: 1200px) {
+  #field1,#field2,#field3,
+  #field4,#field5,#field6,
+  #field7,#field8,#field9{
+    width: 200px;
+    height: 200px;
+  }
+  #message{
+    max-width: 800px;
+  }
 }
 
 
-.first
-{
-  margin-left: 95px;
-}
-.second 
-{
-  margin-left: 20px;
-}
-.third
-{
-  margin-left: 20px;
-}
-.ingroup
-{
-font-family: 'Muli', sans-serif;
+/*GENERAL BUTTONS*/
+
+.ingroup{
+  font-family: 'Muli', sans-serif;
+  width: 100%;
+  margin-top: 25px;
 }
 
-.float
-{
+.float {
 	font-family: 'Muli', sans-serif;
   float: left;
-  
+}
+
+.btn.focus, .btn:focus, .btn:hover {
+  color: #fff;
+  text-decoration: none;
 }
 
 
-  
+/*MAROON BUTTONS*/
+
+.btn-maroon {
+    border-color: maroon;
+    background-color: maroon;
+    color: #ffffff;
+
+}
+.btn-maroon:hover {
+  border-color: maroon;
+  background-color: #600000;
+  color: #ffffff;
+}
+
+.maroon-message{
+  border-color: maroon;
+  background-color: #500000;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 12px;
+  width:100%;
+  font-size: 1.7rem;
+}
 
 
-#ending
-{
-  text-align: center;
-  width:500px;
-  margin-left: auto;
-  margin-right: auto;
+/*ORANGE BUTTONS*/
+
+.btn-orange {
+    border-color: orange;
+    background-color: orange;
+    color: #ffffff;
+
+}
+.btn-orange:hover {
+  border-color: orange;
+  background-color: #FF9500;
+  color: #ffffff;
+}
+
+.orange-message{
+  border-color: orange;
+  background-color: #FF6500;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 12px;
+  width:100%;
+  font-size: 1.7rem;
+}
+
+
+/*TEAL BUTTONS*/
+
+.btn-teal {
+    border-color: teal;
+    background-color: teal;
+    color: #ffffff;
+
+}
+.btn-teal:hover {
+  border-color: teal;
+  background-color: #007070;
+  color: #ffffff;
+}
+
+.teal-message{
+  border-color: teal;
+  background-color: #005050;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 12px;
+  width:100%;
+  font-size: 1.7rem;
 }

@@ -8,133 +8,144 @@ var ticTacToe = {
   whoBegins : function(nextPlayer){
     if(ticTacToe.round === 0){
       ticTacToe.disableButtons();
-      if (nextPlayer === "computer") {
-        ticTacToe.turn = "computer";
-        board.prepare();
-        setTimeout(function(){ticTacToe.computerTurn()}, 1000);
-      }
-      else{
-        ticTacToe.turn = "user";
-        board.prepare();
-      }
+      ticTacToe.prepareFirstMove(nextPlayer);
     }
   },
   disableButtons : function(){
-    $(".btn-group .begin").addClass('disabled').prop('disabled',true);
+    $(".begin").addClass('disabled').prop('disabled',true);
+  },
+  prepareFirstMove : function(player){
+    ticTacToe.turn = player;
+    board.prepare();
+    if(player === 'computer') {
+      setTimeout(function(){ticTacToe.computerTurn()}, 1000);
+    }
   },
   userTurn : function(field){
     var fieldNumber = field[5];
     board.loadImage(field, user.colour);
     ticTacToe.pushValue(fieldNumber);
-    if(ticTacToe.round>=4){ticTacToe.computeResult(user.choices, user.results);}
-    ticTacToe.manageDeletion(fieldNumber);
-    ticTacToe.round += 1;
-    ticTacToe.managePlayerTurn();
+    if(ticTacToe.round>=4){ ticTacToe.computeResult(user.choices); }
+    ticTacToe.endOfRound(fieldNumber);
   },
   computerTurn : function(){
-    if(ticTacToe.round <= 1){var fieldNumber = computer.getRandomChoice(board.fields);}
-    else{var fieldNumber = computer.balancedStrategy();}
-    var field = 'field' + fieldNumber;
-    board.loadImage(field, computer.colour);
+    var fieldNumber = ticTacToe.getBalancedField();
+    board.loadImage("field" + fieldNumber, computer.colour);
     ticTacToe.pushValue(fieldNumber);
-    if(ticTacToe.round>=4){ticTacToe.computeResult(computer.choices, computer.results);}
+    if(ticTacToe.round>=4){ ticTacToe.computeResult(computer.choices); }
+    ticTacToe.endOfRound(fieldNumber);
+  },
+  getBalancedField : function(){
+    if(ticTacToe.round <= 1){ var fieldNumber = computer.getRandomChoice(board.fields); }
+    else{ var fieldNumber = computer.balancedStrategy(); }
+    return fieldNumber;
+  },
+  endOfRound : function(fieldNumber){
     ticTacToe.manageDeletion(fieldNumber);
     ticTacToe.round += 1;
     ticTacToe.managePlayerTurn();
   },
   manageDeletion : function(fieldNumber){
-    if(ticTacToe.turn === 'user'){computer.clearPossibleChoices(user.choices);}
-    else{computer.clearPossibleChoices(computer.choices);}
+    if(ticTacToe.turn === 'user'){ computer.clearPossibleChoices(user.choices); }
+    else{ computer.clearPossibleChoices(computer.choices); }
     board.deleteFields(fieldNumber);
   },
   managePlayerTurn : function(){
     if (ticTacToe.turn === 'user'){
-      if(!ticTacToe.ending){
-        ticTacToe.turn = 'computer';
-        board.disable();
-        setTimeout(function(){ticTacToe.computerTurn()}, 1000);
-      }
-      else{
-        board.setDefaultCursor();
-        board.disable();}
+      if(!ticTacToe.ending){ ticTacToe.setComputerTurn(); }
+      else{ ticTacToe.manageEnding(); }
     }
     else {
-      ticTacToe.turn = 'user';
-      board.prepare();
-      if(ticTacToe.ending){
-        board.setDefaultCursor();
-        board.disable();
-      }
+      ticTacToe.setUserTurn();
     }
+  },
+  setComputerTurn : function(){
+    ticTacToe.turn = 'computer';
+    board.disable();
+    setTimeout(function(){ticTacToe.computerTurn()}, 1000);
+  },
+  setUserTurn : function(){
+    ticTacToe.turn = 'user';
+    board.prepare();
+    if(ticTacToe.ending){
+      ticTacToe.manageEnding();
+    }
+  },
+  manageEnding: function(){
+    board.setDefaultCursor();
+    board.disable();
   },
   pushValue : function(fieldNumber){
     if(ticTacToe.turn === 'user'){var playerChoices = user.choices;}
     else{var playerChoices = computer.choices;}
     playerChoices.push(fieldNumber);
   },
-  computeResult : function(playerChoices, playerResults){
+  computeResult : function(playerChoices){
     if(ticTacToe.round === 4 || ticTacToe.round === 5){
-      var result = 0;
-      for(var i in playerChoices) { result += parseInt(playerChoices[i]); }
-      if(result === ticTacToe.WINNING_SUM){ticTacToe.winner();}
-      else{ ticTacToe.addFirstResults(playerChoices, playerResults);}
-    }
-    else if(ticTacToe.round === 6 || ticTacToe.round === 7){ 
-      var nextResult = ticTacToe.computeNextResult(playerChoices, playerResults);
+      ticTacToe.computeFirstResult(playerChoices);
     }
     else {
-      var endResult = ticTacToe.computeEndResult(playerChoices, playerResults);
+      ticTacToe.computeNextResult(playerChoices);
     }
   },
-  addFirstResults : function(playerChoices, playerResults){
-    for(var i=0;i<playerChoices.length;++i){
-      var first = playerChoices[i];
-      for(var j=i+1;j<playerChoices.length;++j){
-        var second = playerChoices[j];
-        var addChoices = parseInt(first) + parseInt(second);
-        playerResults.push(addChoices);
-      }
-    }
+  computeFirstResult : function(playerChoices){
+    var result = 0;
+    for(var i in playerChoices) { result += parseInt(playerChoices[i]); }
+    if(result === ticTacToe.WINNING_SUM) { ticTacToe.winner(); }
   },
-  computeNextResult : function(playerChoices, playerResults){
-    for(var i=0;i<playerResults.length;++i){
-      var oldResult = playerResults[i];
-      var newResult = parseInt(oldResult) + parseInt(playerChoices[3]);
-      if (newResult === ticTacToe.WINNING_SUM){ticTacToe.winner(); break;}
-    }
-  },
-  computeEndResult : function(playerChoices, playerResults){
+  computeNextResult : function(playerChoices){
     for(var i=0;i<playerChoices.length-1;++i){
-      var firstChoice = playerChoices[i];
-      for(var j = i+1;j<playerChoices.length-1;++j){
-        var secondChoice = playerChoices[j];
-        var combined = parseInt(firstChoice) + parseInt(secondChoice);
-        var combinedWithLast = parseInt(playerChoices[4]) + parseInt(combined);
-        if (combinedWithLast === ticTacToe.WINNING_SUM){ticTacToe.winner(); break;}
-      }
-    }  
-    if(!ticTacToe.ending){
-      ticTacToe.checkForTie();
+      var winner = ticTacToe.manageNextResult(i, playerChoices);
+      if (winner){ ticTacToe.winner(); break; }
     }
+    ticTacToe.checkForTie();
+  },
+  manageNextResult : function(i, playerChoices){
+    var winner = false;
+    for(var j = i+1;j<playerChoices.length-1;++j){
+      var firstChoice = playerChoices[i], secondChoice = playerChoices[j];
+      var combinedWithLast = parseInt(firstChoice) + parseInt(secondChoice)
+                           + parseInt(playerChoices[playerChoices.length - 1]);
+      if (combinedWithLast === ticTacToe.WINNING_SUM){ winner = true; }
+    }
+    return winner;
   },
   checkForTie : function(){
-    ticTacToe.ending = true;
-      document.getElementById("message").innerHTML ="<div class=" + "'alert alert-info'" +  "id='ending'></div>";
-      document.getElementById("ending").innerHTML = "No Winner!" ;
+    if(!ticTacToe.ending && ticTacToe.round === 8){
+      ticTacToe.ending = true;
+      $('#message').addClass('orange-message');
+      $('#message').html("No Winner!");
+    }
   },
   winner : function(){
     ticTacToe.ending = true;
-    if(ticTacToe.turn === 'user'){document.getElementById("message").innerHTML ="<div class=" + "'alert alert-success'" +
-                                                                   "id='ending'></div>";}
-    else{document.getElementById("message").innerHTML ="<div class=" + "'alert alert-error'" +
-                                                       "id='ending'></div>";}
-    document.getElementById("ending").innerHTML = "The " + ticTacToe.turn + " wins!";
+    if(ticTacToe.turn === 'user'){ $('#message').addClass('orange-message'); }
+    else{ $('#message').addClass('orange-message'); }
+    $('#message').html("The " + ticTacToe.turn + " wins!");
   },
   backToMenu : function(){
     location.href = "start.html";
   },
   restart : function(){
     location.href = "balanced.html";
-  } 
-  
+  }
+
 }
+
+$(document).ready(function(){
+  $('#userBegins').on('click', function(){
+    ticTacToe.whoBegins('user');
+  });
+
+  $('#computerBegins').on('click', function(){
+    ticTacToe.whoBegins('computer');
+  });
+
+  $('#back').on('click', function(){
+    ticTacToe.backToMenu();
+  });
+
+  $('#restart').on('click', function(){
+    ticTacToe.restart();
+  });
+});
