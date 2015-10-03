@@ -27,8 +27,8 @@ var board = {
     $('#' + field).css('background-color', colour);
   },
   deleteFields : function(fieldNumber){
-    var index = board.fields.indexOf(fieldNumber);
-    if (index !== undefined){
+    var index = board.fields.indexOf(fieldNumber + '');
+    if (index >= 0){
       board.fields.splice(index,1);
       $('#field' + fieldNumber).removeClass('fields');
     }

@@ -22,12 +22,10 @@ var computer = {
     return uniqueArray;
   },
   balancedStrategy : function(){
-    alert("before: " + computer.possibleChoices);
     computer.prepareChoices();
     var nextChoice = computer.searchForWin();
     if (nextChoice == "noSuccess"){
       nextChoice = computer.findBestMove();
-      alert("after: " + computer.possibleChoices);
     }
     return nextChoice;
   },
@@ -50,8 +48,7 @@ var computer = {
   },
   getRandomChoice : function(array){
     var possibleIndex = Math.floor(Math.random() * (array.length));
-    var nextChoice = array[possibleIndex];
-    return nextChoice;
+    return array[possibleIndex];
   },
   prepareChoices : function(){
     computer.possibleChoices = computer.makeUnique(computer.possibleChoices);

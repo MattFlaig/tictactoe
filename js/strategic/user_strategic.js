@@ -1,7 +1,6 @@
 //USER PLAYER OBJECT (STRATEGIC MODE)
 var user = {
   choices : [],
-  results : [],
   colour : "black",
   possibleChoices : [],
 
@@ -75,13 +74,14 @@ var user = {
     return possibleDilemmaMoves;
   },
   checkDilemma : function(first, second){
-    var checkedDilemmaMoves = [];
-    var firstPossible = parseInt(first) + parseInt(second) + parseInt(user.choices[0]);
-    var secondPossible = parseInt(first) + parseInt(second) + parseInt(user.choices[1]);
-    if(firstPossible == ticTacToe.WINNING_SUM || secondPossible == ticTacToe.WINNING_SUM){
-      checkedDilemmaMoves.push(first, second);
+    var alt1 = parseInt(first) + parseInt(second) + parseInt(user.choices[0]);
+    var alt2 = parseInt(first) + parseInt(second) + parseInt(user.choices[1]);
+    if(alt1 == ticTacToe.WINNING_SUM || alt2 == ticTacToe.WINNING_SUM){
+      return [first, second];
     }
-    return checkedDilemmaMoves;
+    else {
+      return [];
+    }
   },
   searchForWin : function(){
     var nextChoice = user.getWinningMove();

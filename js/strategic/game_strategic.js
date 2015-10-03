@@ -5,7 +5,7 @@ var ticTacToe = {
   turn : " ",
   WINNING_SUM : 15,
 
-   whoBegins : function(nextPlayer){
+  whoBegins : function(nextPlayer){
     if(ticTacToe.round === 0){
       ticTacToe.disableButtons();
       ticTacToe.prepareFirstMove(nextPlayer);
