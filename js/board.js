@@ -2,18 +2,21 @@
 var board = {
   fields : ["2","9","4","7","5","3","6","1","8"],
 
-  setColour : function(oldStyle, newStyle){
-    $('body').css('background-color', newStyle);
-    computer.colour = newStyle;
-    $('.btn').removeClass('btn-' + oldStyle);
-    $('.btn').addClass('btn-' + newStyle);
+  setColour : function(newColour){
+    $('body').css('background-color', newColour);
+    computer.colour = newColour;
+  },
+  resetButtons : function(oldStyle, newStyle){
+    $('.btn').removeClass('btn-' + ticTacToe.styles[oldStyle]);
+    $('.btn').addClass('btn-' + ticTacToe.styles[newStyle]);
+  },
+  resetFields : function(){
+    board.fields = ["2","9","4","7","5","3","6","1","8"];
+    $('td div').css('background-color', 'white');
+    $('td div').addClass('fields');
   },
   prepare : function(){
     if(ticTacToe.turn === 'user'){
-      $('.fields').on('click', function(e){
-        var id = e.target.id;
-        ticTacToe.userTurn(id);
-      });
       board.enablePointerCursor();
     }
     else{

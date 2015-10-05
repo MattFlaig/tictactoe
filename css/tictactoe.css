@@ -134,7 +134,6 @@ table td
 .ingroup{
   font-family: 'Muli', sans-serif;
   width: 100%;
-  margin-top: 25px;
 }
 
 .float {
@@ -145,6 +144,10 @@ table td
 .btn.focus, .btn:focus, .btn:hover {
   color: #fff;
   text-decoration: none;
+}
+
+button{
+  margin-top: 25px;
 }
 
 

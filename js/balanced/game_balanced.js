@@ -1,19 +1,47 @@
-//TICTACTOE GAME OBJECT (BALANCED MODE)
+//TICTACTOE GAME OBJECT
 var ticTacToe = {
   round : 0,
   ending : false,
   turn : " ",
   WINNING_SUM : 15,
   styles :  {
-              "chaotic" : "maroon",
-              "balanced" : "orange",
-              "strategic" : "teal"
-            },
+    "chaotic" : "maroon",
+    "balanced" : "orange",
+    "strategic" : "teal"
+  },
 
   setPlayingStyle : function(oldStyle, newStyle){
     computer.playingStyle = newStyle;
     $('#playingStyle').text("Computer playing style: " + newStyle);
-    board.setColour(ticTacToe.styles[oldStyle], ticTacToe.styles[newStyle]);
+    board.setColour(ticTacToe.styles[newStyle]);
+    board.resetButtons(oldStyle, newStyle);
+    ticTacToe.setDefaultValues(oldStyle);
+  },
+  setDefaultValues : function(oldStyle){
+    ticTacToe.backToDefault();
+    ticTacToe.emptyChoices();
+    ticTacToe.hideMessage(oldStyle);
+    ticTacToe.enableButtons();
+    board.resetFields();
+  },
+  backToDefault : function(){
+    ticTacToe.round = 0;
+    ticTacToe.ending = false;
+    ticTacToe.turn = " ";
+  },
+  emptyChoices : function(){
+    computer.choices = [];
+    user.choices = [];
+    computer.possibleChoices = [];
+    user.possibleChoices = [];
+  },
+  hideMessage : function(oldStyle){
+    $('#message').text('');
+    $('#message').removeClass(ticTacToe.styles[oldStyle] + '-message');
+  },
+  enableButtons : function(){
+    $('.btn').removeClass('disabled');
+    $('.btn').removeAttr('disabled');
   },
   whoBegins : function(nextPlayer){
     if(ticTacToe.round === 0){
@@ -28,7 +56,7 @@ var ticTacToe = {
     ticTacToe.turn = player;
     board.prepare();
     if(player === 'computer') {
-      setTimeout(function(){ticTacToe.computerTurn()}, 1000);
+      setTimeout(function(){ ticTacToe.computerTurn(); }, 1000);
     }
   },
   userTurn : function(field){
@@ -39,15 +67,42 @@ var ticTacToe = {
     ticTacToe.endOfRound(fieldNumber);
   },
   computerTurn : function(){
-    var fieldNumber = ticTacToe.getBalancedField();
+    var fieldNumber = ticTacToe.determineFieldNumber();
     board.loadImage("field" + fieldNumber, computer.colour);
     ticTacToe.pushValue(fieldNumber);
     if(ticTacToe.round>=4){ ticTacToe.computeResult(computer.choices); }
     ticTacToe.endOfRound(fieldNumber);
   },
+  determineFieldNumber : function(){
+    if(computer.playingStyle === 'chaotic') {
+      var fieldNumber = ticTacToe.getChaoticField();
+    }
+    else if(computer.playingStyle === 'balanced') {
+      var fieldNumber = ticTacToe.getBalancedField();
+    }
+    else{
+      var fieldNumber = ticTacToe.getStrategicField();
+    }
+    return fieldNumber;
+  },
+  getChaoticField : function(){
+    return ticTacToe.computeRandomField();
+  },
   getBalancedField : function(){
     if(ticTacToe.round <= 1){ var fieldNumber = computer.getRandomChoice(board.fields); }
     else{ var fieldNumber = computer.balancedStrategy(); }
+    return fieldNumber;
+  },
+  getStrategicField : function(){
+    if(ticTacToe.round <= 1){var fieldNumber = computer.findFirstMove();}
+    else if(ticTacToe.round == 2 || ticTacToe.round == 3){var fieldNumber = computer.findSecondMove();}
+    else {var fieldNumber = computer.findStrategicMove();}
+    return fieldNumber;
+  },
+  computeRandomField : function(){
+    var fields = board.fields;
+    var choiceIndex = Math.floor(Math.random() * (fields.length));
+    var fieldNumber = fields[choiceIndex];
     return fieldNumber;
   },
   endOfRound : function(fieldNumber){
@@ -56,23 +111,26 @@ var ticTacToe = {
     ticTacToe.managePlayerTurn();
   },
   manageDeletion : function(fieldNumber){
-    if(ticTacToe.turn === 'user'){ computer.clearPossibleChoices(user.choices); }
-    else{ computer.clearPossibleChoices(computer.choices); }
+    if(computer.playingStyle !== 'chaotic'){
+      if(ticTacToe.turn === 'user'){ computer.clearPossibleChoices(user.choices); }
+      else{ computer.clearPossibleChoices(computer.choices); }
+    }
     board.deleteFields(fieldNumber);
   },
   managePlayerTurn : function(){
-    if (ticTacToe.turn === 'user'){
-      if(!ticTacToe.ending){ ticTacToe.setComputerTurn(); }
-      else{ ticTacToe.manageEnding(); }
+    if (ticTacToe.turn === 'computer'){
+      ticTacToe.setUserTurn();
     }
     else {
       ticTacToe.setUserTurn();
+      if(!ticTacToe.ending){ ticTacToe.setComputerTurn(); }
+      else{ ticTacToe.manageEnding(); }
     }
   },
   setComputerTurn : function(){
     ticTacToe.turn = 'computer';
     board.disable();
-    setTimeout(function(){ticTacToe.computerTurn()}, 1000);
+    setTimeout(function(){ ticTacToe.computerTurn(); }, 1000);
   },
   setUserTurn : function(){
     ticTacToe.turn = 'user';
@@ -86,9 +144,8 @@ var ticTacToe = {
     board.disable();
   },
   pushValue : function(fieldNumber){
-    if(ticTacToe.turn === 'user'){var playerChoices = user.choices;}
-    else{var playerChoices = computer.choices;}
-    playerChoices.push(fieldNumber);
+    if(ticTacToe.turn === 'user'){ user.choices.push(fieldNumber); }
+    else{ computer.choices.push(fieldNumber); }
   },
   computeResult : function(playerChoices){
     if(ticTacToe.round === 4 || ticTacToe.round === 5){
@@ -123,21 +180,17 @@ var ticTacToe = {
   checkForTie : function(){
     if(!ticTacToe.ending && ticTacToe.round === 8){
       ticTacToe.ending = true;
-      $('#message').addClass('orange-message');
+      $('#message').addClass(ticTacToe.styles[computer.playingStyle] +'-message');
       $('#message').html("No Winner!");
     }
   },
   winner : function(){
     ticTacToe.ending = true;
-    if(ticTacToe.turn === 'user'){ $('#message').addClass('orange-message'); }
-    else{ $('#message').addClass('orange-message'); }
+    $('#message').addClass(ticTacToe.styles[computer.playingStyle] +'-message');
     $('#message').html("The " + ticTacToe.turn + " wins!");
   },
-  backToMenu : function(){
-    location.href = "start.html";
-  },
   restart : function(){
-    location.href = "balanced.html";
+    ticTacToe.setDefaultValues(computer.playingStyle);
   }
 
 }
@@ -151,12 +204,13 @@ $(document).ready(function(){
     ticTacToe.whoBegins('computer');
   });
 
-  $('#back').on('click', function(){
-    ticTacToe.backToMenu();
-  });
-
   $('#restart').on('click', function(){
     ticTacToe.restart();
+  });
+
+  $('#board').on('click', '.fields', function(e){
+    var id = e.target.id;
+    ticTacToe.userTurn(id);
   });
 
   $('#setPlayingStyle li a').on('click', function(){
