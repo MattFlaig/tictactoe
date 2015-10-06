@@ -150,6 +150,10 @@ button{
   margin-top: 25px;
 }
 
+.dropdown-menu {
+  width: 100%;
+}
+
 
 /*MAROON BUTTONS*/
 

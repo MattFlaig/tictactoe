@@ -1,4 +1,4 @@
-//USER PLAYER OBJECT (BALANCED MODE)
+//USER PLAYER OBJECT
 var user = {
   choices : [],
   colour : "black",

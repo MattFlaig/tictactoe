@@ -1,4 +1,4 @@
-//COMPUTER PLAYER OBJECT (BALANCED MODE)
+//COMPUTER PLAYER OBJECT
 var computer = {
   choices : [],
   colour : "orange",
