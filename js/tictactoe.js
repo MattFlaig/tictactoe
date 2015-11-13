@@ -38,6 +38,7 @@ var ticTacToe = {
   hideMessage : function(oldStyle){
     $('#message').text('');
     $('#message').removeClass(ticTacToe.styles[oldStyle] + '-message');
+    $('#message').css('display', 'none');
   },
   enableButtons : function(){
     $('.btn').removeClass('disabled');
@@ -181,13 +182,24 @@ var ticTacToe = {
     if(!ticTacToe.ending && ticTacToe.round === 8){
       ticTacToe.ending = true;
       $('#message').addClass(ticTacToe.styles[computer.playingStyle] +'-message');
+      ticTacToe.scrollToNav();
       $('#message').html("No Winner!");
+      $('#message').fadeIn(2000);
     }
   },
   winner : function(){
     ticTacToe.ending = true;
     $('#message').addClass(ticTacToe.styles[computer.playingStyle] +'-message');
-    $('#message').html("The " + ticTacToe.turn + " wins!");
+    ticTacToe.scrollToNav();
+    $('#message').html("The " + ticTacToe.turn + " wins!")
+    $('#message').fadeIn(2000);
+
+  },
+  scrollToBoard : function(){
+    $("html, body").animate({ scrollTop: $('#board').offset().top }, 'slow');
+  },
+  scrollToNav : function(){
+    $('html, body').animate({scrollTop:0}, 'slow');
   },
   restart : function(){
     ticTacToe.setDefaultValues(computer.playingStyle);
@@ -198,10 +210,12 @@ var ticTacToe = {
 $(document).ready(function(){
   $('#userBegins').on('click', function(){
     ticTacToe.whoBegins('user');
+    ticTacToe.scrollToBoard();
   });
 
   $('#computerBegins').on('click', function(){
     ticTacToe.whoBegins('computer');
+    ticTacToe.scrollToBoard();
   });
 
   $('#restart').on('click', function(){
